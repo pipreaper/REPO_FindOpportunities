@@ -40,7 +40,7 @@ public:
 // Constructor
 void ATRInfo::ATRInfo(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, int _atrRange, ENUM_CAT_ID _catalystID)
   {
-   atrHandle=iCustom(_symbol,_Period,"HTFATR",_waveHTFPeriod,_atrRange,_catalystID,false,DRAW_LINE);  
+   atrHandle=iATR(_symbol,_waveHTFPeriod,_atrRange);  
    symbol = _symbol;
    waveHTFPeriod = _waveHTFPeriod;
    atrWrapper=new ATRWrapper();

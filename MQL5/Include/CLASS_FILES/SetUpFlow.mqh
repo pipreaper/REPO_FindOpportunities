@@ -452,20 +452,20 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
    if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_iTF))!= POINTER_INVALID)
      {
       rTip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_iTF);
-      int startCandle = MathMin(ArraySize(rTip.ratesThisTF)-1,rTip.maxBarsDegugRun);
-      Print(__FUNCTION__," index ",_iTF," startCandle  ",ArraySize(rTip.ratesThisTF)-1," start time: ",rTip.ratesThisTF[ArraySize(rTip.ratesThisTF)-1].time);
+      int startCandle = MathMin(ArraySize(rTip.ratesCTF)-1,rTip.maxBarsDegugRun);
+      Print(__FUNCTION__," index ",_iTF," startCandle  ",startCandle," start time: ",rTip.ratesThisTF[startCandle].time,"maxBarsDebugRun: ",rTip.maxBarsDegugRun);
       for(int shift = startCandle; shift>0; shift--)
         {
          rTip.countIndicatorPulls += 1;
-         int initBars = int(MathRound(rTip.atrWaveInfo.atrRange*(PeriodSeconds(rTip.waveHTFPeriod)/PeriodSeconds(_Period))));
-         if(rTip.countIndicatorPulls <= initBars)
+        // int initBars = int(MathRound(rTip.atrWaveInfo.atrRange*(PeriodSeconds(rTip.waveHTFPeriod)/PeriodSeconds(_Period))));
+         if(rTip.countIndicatorPulls <= rTip.atrRange)
             continue;
          if(wCalcSizeType == waveCalcATR)
            {
             if(!rTip.atrWaveInfo.setWaveHeightPointsATR(rTip.onScreenWaveHeight,shift))
                Print(__FUNCTION__," rTip.ratesCTF[shift].time: ",rTip.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Error: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
-            else
-               Print(__FUNCTION__," rTip.ratesCTF[shift].time: ",rTip.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Sucess: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
+            //else
+             //  Print(__FUNCTION__," rTip.ratesCTF[shift].time: ",rTip.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Sucess: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
            }
          else
             rTip.atrWaveInfo.setWaveHeightPointsFixed(rTip.onScreenWaveHeight);

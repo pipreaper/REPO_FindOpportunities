@@ -38,6 +38,8 @@ public:
    bool              RatesFlow::initIndicatorsTick();
    // ensure have inital ratesHTF to: strategy test/real data run system
    bool              RatesFlow::initInitialRatesSequence();
+   bool              RatesFlow::initInitialRatesSequenceCTF();
+   bool              RatesFlow::initInitialRatesSequenceHTF();
    // call chart period and all other broker data requests
    bool              RatesFlow::callGetBrokerDataTrend(int _ins, ENUM_TIMEFRAMES _TF, MqlRates &_tipRates[]);
   };
@@ -144,37 +146,46 @@ bool              RatesFlow::initIndicatorsTick()
          if(CheckPointer(instrumentPointers[ins].pContainerTip.GetNodeAtIndex(iTF))!= POINTER_INVALID)
            {
             rTip=instrumentPointers[ins].pContainerTip.GetNodeAtIndex(iTF);
-            int initBars = int(MathRound(rTip.atrWaveInfo.atrRange*(PeriodSeconds(rTip.waveHTFPeriod)/PeriodSeconds(_Period))));
+            // int initBars = int(MathRound(rTip.atrWaveInfo.atrRange*(PeriodSeconds(rTip.waveHTFPeriod)/PeriodSeconds(_Period))));
             double tempGetAtrValues[];
             int startCandle = MathMin(ArraySize(rTip.ratesThisTF)-1,rTip.maxBarsDegugRun);
-            if(CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,initBars, tempGetAtrValues) < initBars)
+            if(CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,startCandle, tempGetAtrValues) < startCandle)
               {
-               Print(__FUNCTION__," couldnt get atr values -> want: ",initBars, "  found: ",CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,initBars, tempGetAtrValues)," ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));
+               Print(__FUNCTION__," couldnt get atr values -> want: ",startCandle, "  found: ",CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,startCandle, tempGetAtrValues)," ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));
                return false;
               }
             else
               {
-               Print(__FUNCTION__," found       atr values -> want: ",initBars, "  found: ",CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,initBars, tempGetAtrValues)," ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));
-               for(int i = ArraySize(tempGetAtrValues)-1; i >0 ; i--)
-                  Print(i," ",tempGetAtrValues[i]);
+               //for(int i = ArraySize(tempGetAtrValues)-1; i >0 ; i--)
+               // Print(i," ",tempGetAtrValues[i]);
+               Print(__FUNCTION__," found       atr values -> want: ",startCandle, "  found: ",CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,startCandle, tempGetAtrValues)," ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));
               }
            }
         }
      }
-  //   crash();
+//   crash();
    return true;
+  }
+// +------------------------------------------------------------------+
+// |setInitialRatesSequence                                           |
+// +------------------------------------------------------------------+
+bool              RatesFlow::initInitialRatesSequence()
+  {
+   if(initInitialRatesSequenceCTF() && initInitialRatesSequenceHTF())
+      return true;
+   else
+     {
+      Print(__FUNCTION__," failed to find rates: "," initInitialRatesSequenceCTF() ",initInitialRatesSequenceCTF()," initInitialRatesSequenceHTF() ",initInitialRatesSequenceHTF());
+      return false;
+     }
   }
 // +------------------------------------------------------------------+
 // |setInitialRatesSequence                                           |
 // |this is checking that you have all the                            |
 // | data for levels volume and Trends                                |
 // +------------------------------------------------------------------+
-bool              RatesFlow::initInitialRatesSequence()
+bool              RatesFlow::initInitialRatesSequenceCTF()
   {
-//MqlRates ratesHTF[];
-//MqlRates ratesChartBars[];
-// ensure data integrity before run
-// ** LOOP ALL SYSMBOLS SELECTED
    int aSize=ArraySize(instrumentPointers)-1;
    Tip* tip[1];
    if(CheckPointer(tfDataAll)!=POINTER_INVALID)
@@ -187,9 +198,24 @@ bool              RatesFlow::initInitialRatesSequence()
             Print(__FUNCTION__," returned false from ins/period: ",ins," ",_Period);
             return false;
            }
-         // else
-         //  Print(__FUNCTION__," symbol: ",this.instrumentPointers[ins].symbol," _Period ",EnumToString(_Period), " firstTime: ", ratesChartBars[ArraySize(ratesChartBars)-1].time," last time: ",ratesChartBars[0].time);
-         // calls period again if it uses it as a main lower Tf - so what!
+        }// instrument
+     }
+   return true;
+  }
+// +------------------------------------------------------------------+
+// |setInitialRatesSequence                                           |
+// |this is checking that you have all the                            |
+// | data for levels volume and Trends                                |
+// +------------------------------------------------------------------+
+bool              RatesFlow::initInitialRatesSequenceHTF()
+  {
+   int aSize=ArraySize(instrumentPointers)-1;
+   Tip* tip[1];
+   if(CheckPointer(tfDataAll)!=POINTER_INVALID)
+     {
+      for(int ins=0; ins<=aSize; ins++)
+        {
+         this.getTip(ins, _Period, tip);
          for(int TF=0; TF<ArraySize(tfDataAll.useTF); TF++)
            {
             this.getTip(ins,tfDataAll.useTF[TF],tip);
