@@ -7,6 +7,7 @@
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 #include    <\\CLASS_FILES\\ContainerTip.mqh>
+#include    <\\CLASS_FILES\\Tip.mqh>
 //#include    <\\CLASS_FILES\\TipElement.mqh>
 // +------------------------------------------------------------------+
 // |DiagTip                                                           |

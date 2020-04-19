@@ -12,6 +12,7 @@
 #include    <\\CLASS_FILES\\ATRWaveInfo.mqh>
 #include    <\\CLASS_FILES\\CCIWaveInfo.mqh>
 #include    <\\CLASS_FILES\\EMAInfo.mqh>
+#include    <\\CLASS_FILES\\ContainerTip.mqh>
 #include    <\\INCLUDE_FILES\\drawing.mqh>
 class TipElement;
 // +------------------------------------------------------------------------+
@@ -76,7 +77,8 @@ public:
    ENUM_TIMEFRAMES   waveHTFPeriod;
    // both set in ratesFlow
    //chart tfs
-   MqlRates          ratesCTF[];   
+   ContainerTip      *parent;
+ //  MqlRates          parent.ratesCTF[];
    // start and stop dates compatible with all HTFs used
    MqlRates          ratesThisTF[];
    int               numratesThisTF;
@@ -122,6 +124,7 @@ public:
    ENUM_LINE_STYLE   Tip::getLineStyle(trendState _trend);
    // get arrowStyle
    uchar             Tip::getArrowStyle(trendState _trend);
+   void              Tip::setParent(ContainerTip *p);
    // check rates Bars are created
    bool              Tip::initTip(string _symbol,int _numDefineWave,int _chartPeriod,ENUM_TIMEFRAMES _waveHTFPeriod,color _clrLine,waveCalcSizeType _wCalcSizeType,int _atrRange,
                                   int _maPeriod,int _maAppliedPrice,int _minBars,int _maxBars,double _percentPullBack,double _atrMultiplier,double _scaleATR,
@@ -235,6 +238,13 @@ bool              Tip::initTip(string _symbol,int _numDefineWave,int _chartPerio
    this.Add(tipe);
    return true;
   }
+//+------------------------------------------------------------------+
+//|Get the container of this tip                                     |
+//+------------------------------------------------------------------+
+void Tip::setParent(ContainerTip *p)
+  {
+   parent = p;
+  }
 // +------------------------------------------------------------------+
 // |Chart Bars are needed for evey Tip with a HTF on each             |
 // |instrument/Tip                                                    |
@@ -252,7 +262,7 @@ bool Tip::checkRateBarsAreSynced()
 //      maxBarsHTF = Bars(symbol,waveHTFPeriod);
 //      maxBarsCTF = Bars(symbol,_Period);
 //      numratesThisTF=CopyRates(symbol,waveHTFPeriod,0,maxBarsHTF,ratesThisTF);
-//      numRatesCTF=CopyRates(symbol,_Period,0,maxBarsCTF,ratesCTF);
+//      numRatesCTF=CopyRates(symbol,_Period,0,maxBarsCTF,parent.parent.ratesCTF);
 //     }
 //   else
 //     {
@@ -262,23 +272,23 @@ bool Tip::checkRateBarsAreSynced()
 //      maxBarsHTF = Bars(symbol,waveHTFPeriod);
 //      maxBarsCTF = Bars(symbol,_Period);
 //      numratesThisTF=CopyRates(symbol,waveHTFPeriod,0,maxBarsHTF,ratesThisTF);
-//      numRatesCTF=CopyRates(symbol,_Period,0,maxBarsCTF,ratesCTF);
+//      numRatesCTF=CopyRates(symbol,_Period,0,maxBarsCTF,parent.ratesCTF);
 //     }
 // calculate start available for  HTF
-  // int periodSecondsTF=PeriodSeconds();
- //  int periodSecondsHTF=PeriodSeconds(waveHTFPeriod);
- //  int periodRatio=periodSecondsHTF/periodSecondsTF;
- //  ArraySetAsSeries(ratesCTF,true);
- //  ArraySetAsSeries(ratesThisTF,true);
+// int periodSecondsTF=PeriodSeconds();
+//  int periodSecondsHTF=PeriodSeconds(waveHTFPeriod);
+//  int periodRatio=periodSecondsHTF/periodSecondsTF;
+//  ArraySetAsSeries(parent.ratesCTF,true);
+//  ArraySetAsSeries(ratesThisTF,true);
 // CTF must start here to capture 1000 HTF bars -> 1000 Bars is considered enough to capture trend (if not fails to initialise)
- //  startCTFShift = (periodRatio*maxBarsDegugRun) + 1;
+//  startCTFShift = (periodRatio*maxBarsDegugRun) + 1;
 // if we dont have a 1000 bars then whats the maximum
- //  if((numRatesCTF-1) < startCTFShift)
- //     startCTFShift = numRatesCTF-1;
- //  CopyRates(symbol,_Period,0,startCTFShift,ratesCTF);
+//  if((numRatesCTF-1) < startCTFShift)
+//     startCTFShift = numRatesCTF-1;
+//  CopyRates(symbol,_Period,0,startCTFShift,parent.ratesCTF);
 // Calculate HTF rates Array
 // get time of start CTF to satisfy HTF (calc above)
- //  datetime startTimeCTF = ratesCTF[startCTFShift-1].time;
+//  datetime startTimeCTF = parent.ratesCTF[startCTFShift-1].time;
 // so find time HTF
 //startHTFShift=iBarShift(symbol,waveHTFPeriod,startTimeCTF,true);
 //CopyRates(symbol,waveHTFPeriod,0,startHTFShift,ratesThisTF);
@@ -405,12 +415,12 @@ bool              Tip::processTrendBarInit(int _shift)
    TipElement *tipe =  this.GetLastNode();
    if(tipe.tipElementState == firstTipeTEState)
      {
-      tipe.leftTime = ratesCTF[_shift].time;
-      tipe.rightTime=ratesCTF[_shift].time;
-      tipe.high =ratesCTF[_shift].high;
-      tipe.low =ratesCTF[_shift].low;
+      tipe.leftTime = parent.ratesCTF[_shift].time;
+      tipe.rightTime=parent.ratesCTF[_shift].time;
+      tipe.high =parent.ratesCTF[_shift].high;
+      tipe.low =parent.ratesCTF[_shift].low;
       // nearest the close is left most point
-      if(ratesCTF[_shift].close > (ratesCTF[_shift].low + (0.5*(ratesCTF[_shift].high-ratesCTF[_shift].low))))
+      if(parent.ratesCTF[_shift].close > (parent.ratesCTF[_shift].low + (0.5*(parent.ratesCTF[_shift].high-parent.ratesCTF[_shift].low))))
         {
          tipe.leftPrice=tipe.low;
          tipe.rightPrice = tipe.high;
@@ -422,7 +432,7 @@ bool              Tip::processTrendBarInit(int _shift)
          tipe.rightPrice = tipe.low;
          tipe.tipElementState=downTEState;
         }
-      tipe.vol=ratesCTF[_shift].tick_volume;
+      tipe.vol=parent.ratesCTF[_shift].tick_volume;
       tipe.setElementParams();
       updateTrendPointers();
       drawNewWaveLine(tipe);
@@ -434,7 +444,7 @@ bool              Tip::processTrendBarInit(int _shift)
       condition = true;
    ChartRedraw();
 // ArrayFree(ratesThisTF);
-// ArrayFree(ratesCTF);
+// ArrayFree(parent.ratesCTF);
    return condition;
   }
 // +------------------------------------------------------------------+
@@ -443,8 +453,8 @@ bool              Tip::processTrendBarInit(int _shift)
 void Tip::debugStates(int _ins, string _action,int _shift,int _count)
   {
    Print("shift: ",_shift);
-// int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.ratesCTF[_shift].time,true);
-   Print(_count," ",_action," ",__FUNCTION__," shift: ",_shift," **** ",ratesCTF[_shift].time);
+// int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
+   Print(_count," ",_action," ",__FUNCTION__," shift: ",_shift," **** ",parent.ratesCTF[_shift].time);
    Print(" ",symbol);
    Print(" XTimes[0] ",XTimes[0]," YVals[0] ",YVals[0]);
    Print(" XTimes[1] ",XTimes[1]," YVals[1] ",YVals[1]);
@@ -474,13 +484,13 @@ void              Tip::interrogateWaveArm(int _shift)
    if(CheckPointer(tipe)!=POINTER_INVALID)
      {
       // are you cycling or extending
-      double high = ratesCTF[_shift].high;
-      double low = ratesCTF[_shift].low;
+      double high = parent.ratesCTF[_shift].high;
+      double low = parent.ratesCTF[_shift].low;
       bool canCycleUp   =  NormalizeDouble((high - tipe.low),atrWaveInfo.digits)>=(atrWaveInfo.waveHeightPts*atrWaveInfo.pointSize);
       bool canCycleDown =  NormalizeDouble((tipe.high - low),atrWaveInfo.digits)>=(atrWaveInfo.waveHeightPts*atrWaveInfo.pointSize);
-    //  Print(__FUNCTION__," ",_shift, canCycleUp, " ",canCycleDown);
-    //  Print(__FUNCTION__," ", waveHeight ",atrWaveInfo.waveHeightPts, " pointSize ",atrWaveInfo.waveHeightPts*atrWaveInfo.pointSize, " digits ",atrWaveInfo.digits);
-   //   Print(__FUNCTION__," ", tipe.low ",tipe.low, " tipe.high ",tipe.high);
+      //  Print(__FUNCTION__," ",_shift, canCycleUp, " ",canCycleDown);
+      //  Print(__FUNCTION__," ", waveHeight ",atrWaveInfo.waveHeightPts, " pointSize ",atrWaveInfo.waveHeightPts*atrWaveInfo.pointSize, " digits ",atrWaveInfo.digits);
+      //   Print(__FUNCTION__," ", tipe.low ",tipe.low, " tipe.high ",tipe.high);
       if(canCycleUp && canCycleDown)
         {
          double upMove = high-tipe.rightPrice;
@@ -488,25 +498,25 @@ void              Tip::interrogateWaveArm(int _shift)
          if((tipe.getTipElementState()==upTEState) &&(upMove>downMove))
            {
             extending(_shift,tipe,upTEState);
-   //         Print(__FUNCTION__," 1 extending ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+            //         Print(__FUNCTION__," 1 extending ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
            }
          else
             if((tipe.getTipElementState()==downTEState) &&(downMove>upMove))
               {
                extending(_shift,tipe,downTEState);
-      //         Print(__FUNCTION__," 2 extending ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+               //         Print(__FUNCTION__," 2 extending ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
               }
             else
                if((tipe.getTipElementState()==upTEState) &&(downMove>upMove))
                  {
                   cycleing(_shift,tipe,downTEState);
-        //          Print(__FUNCTION__," 3 cycle",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+                  //          Print(__FUNCTION__," 3 cycle",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
                  }
                else
                   if((tipe.getTipElementState()==downTEState) &&(upMove>downMove))
                     {
                      cycleing(_shift,tipe,upTEState);
-          //           Print(__FUNCTION__," 4 cycle ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+                     //           Print(__FUNCTION__," 4 cycle ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
                     }
         }
       else
@@ -515,7 +525,7 @@ void              Tip::interrogateWaveArm(int _shift)
             // extend up
            {
             extending(_shift,tipe,upTEState);
-     //       Print(__FUNCTION__," 5 extending",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+            //       Print(__FUNCTION__," 5 extending",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
            }
          else
             if((low<tipe.low) &&
@@ -523,7 +533,7 @@ void              Tip::interrogateWaveArm(int _shift)
                // extendDown
               {
                extending(_shift,tipe,downTEState);
-        //       Print(__FUNCTION__," 6 extending ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+               //       Print(__FUNCTION__," 6 extending ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
               }
             else
                if((high>tipe.low) &&
@@ -532,7 +542,7 @@ void              Tip::interrogateWaveArm(int _shift)
                   // cycleUp
                  {
                   cycleing(_shift,tipe,upTEState);
-       //           Print(__FUNCTION__," 7 cycleing ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+                  //           Print(__FUNCTION__," 7 cycleing ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
                  }
                else
                   if((low<tipe.high) &&
@@ -541,10 +551,10 @@ void              Tip::interrogateWaveArm(int _shift)
                      // cycleDown
                     {
                      cycleing(_shift,tipe,downTEState);
-         //            Print(__FUNCTION__," 8 cycleing ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+                     //            Print(__FUNCTION__," 8 cycleing ",tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
                     }
       // volume zeroed in cycled but always cumulated from that zero or its value here
-      tipe.vol+=ratesCTF[_shift].tick_volume;
+      tipe.vol+=parent.ratesCTF[_shift].tick_volume;
      }
   }
 // +---------------------------------------------------------------------+
@@ -567,7 +577,7 @@ void              Tip::analyseTipState(int _shift)
   {
    if(!this.hasInitialised)
      {
-     // Print(__FUNCTION__," 0 !hasInitialised ",EnumToString(this.waveHTFPeriod));
+      // Print(__FUNCTION__," 0 !hasInitialised ",EnumToString(this.waveHTFPeriod));
       setTipState(this.tipState);
      }
    else
@@ -578,7 +588,7 @@ void              Tip::analyseTipState(int _shift)
          (tipePntrs[3].rightPrice > tipePntrs[2].rightPrice))
         {
          this.setTipState(up);
-    //     Print(__FUNCTION__," 1 up ",EnumToString(this.waveHTFPeriod));
+         //     Print(__FUNCTION__," 1 up ",EnumToString(this.waveHTFPeriod));
         }
       else
          if(
@@ -588,23 +598,23 @@ void              Tip::analyseTipState(int _shift)
             (tipePntrs[3].rightPrice < tipePntrs[2].rightPrice))
            {
             this.setTipState(down);
-      //      Print(__FUNCTION__," 2 down ",EnumToString(this.waveHTFPeriod));
+            //      Print(__FUNCTION__," 2 down ",EnumToString(this.waveHTFPeriod));
            }
          else
             if((this.getTipState() == up)&&
                (tipePntrs[3].getTipElementState() == downTEState)&&
-               ((ratesCTF[_shift].low < tipePntrs[1].rightPrice)))
+               ((parent.ratesCTF[_shift].low < tipePntrs[1].rightPrice)))
               {
                this.setTipState(congested);
-        //       Print(__FUNCTION__," 3 congested",EnumToString(this.waveHTFPeriod));
+               //       Print(__FUNCTION__," 3 congested",EnumToString(this.waveHTFPeriod));
               }
             else
                if((this.getTipState() == down)&&
                   (tipePntrs[3].getTipElementState() == upTEState)&&
-                  ((ratesCTF[_shift].high > tipePntrs[1].rightPrice)))
+                  ((parent.ratesCTF[_shift].high > tipePntrs[1].rightPrice)))
                  {
                   this.setTipState(congested);
-          //        Print(__FUNCTION__," 4 congested ",EnumToString(this.waveHTFPeriod));
+                  //        Print(__FUNCTION__," 4 congested ",EnumToString(this.waveHTFPeriod));
                  }
    updateTrendLineStyles();
    updateArrowStyles();
@@ -619,18 +629,18 @@ void              Tip::extending(int _shift, TipElement *_tipe, trendElementStat
    _tipe.tipElementState=_tes;
    if(_tes == upTEState)
      {
-      _tipe.high = ratesCTF[_shift].high;
-      _tipe.rightPrice=ratesCTF[_shift].high;
-   //   Print(__FUNCTION__," shift ",_shift," upTEState ",_tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+      _tipe.high = parent.ratesCTF[_shift].high;
+      _tipe.rightPrice=parent.ratesCTF[_shift].high;
+      //   Print(__FUNCTION__," shift ",_shift," upTEState ",_tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
      }
    else
       if(_tes==downTEState)
         {
-         _tipe.low =ratesCTF[_shift].low;
-         _tipe.rightPrice=ratesCTF[_shift].low;
-     //    Print(__FUNCTION__," shift ",_shift," downTEState ",_tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+         _tipe.low =parent.ratesCTF[_shift].low;
+         _tipe.rightPrice=parent.ratesCTF[_shift].low;
+         //    Print(__FUNCTION__," shift ",_shift," downTEState ",_tipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
         }
-   _tipe.rightTime=ratesCTF[_shift].time;
+   _tipe.rightTime=parent.ratesCTF[_shift].time;
    TrendPointChange(0,_tipe.waveLineName,1,_tipe.rightTime,_tipe.rightPrice);
 
    ChartRedraw();
@@ -655,24 +665,24 @@ void              Tip::cycleing(int _shift, TipElement *_tipe, trendElementState
 
    if(_tes ==upTEState)
      {
-      nTipe.rightPrice=ratesCTF[_shift].high;
-      nTipe.rightTime=ratesCTF[_shift].time;
-      nTipe.high = ratesCTF[_shift].high;
+      nTipe.rightPrice=parent.ratesCTF[_shift].high;
+      nTipe.rightTime=parent.ratesCTF[_shift].time;
+      nTipe.high = parent.ratesCTF[_shift].high;
       nTipe.low = _tipe.rightPrice;
       nTipe.leftPrice=_tipe.rightPrice;
       nTipe.leftTime=_tipe.rightTime;
-   //   Print(__FUNCTION__," shift ",_shift," upTEState ",nTipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+      //   Print(__FUNCTION__," shift ",_shift," upTEState ",nTipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
      }
    else
       if(_tes==downTEState)
         {
-         nTipe.rightPrice=ratesCTF[_shift].low;
-         nTipe.rightTime=ratesCTF[_shift].time;
+         nTipe.rightPrice=parent.ratesCTF[_shift].low;
+         nTipe.rightTime=parent.ratesCTF[_shift].time;
          nTipe.high = _tipe.rightPrice;
-         nTipe.low = ratesCTF[_shift].low;
+         nTipe.low = parent.ratesCTF[_shift].low;
          nTipe.leftPrice=_tipe.rightPrice;
          nTipe.leftTime=_tipe.rightTime;
-      //   Print(__FUNCTION__," shift ",_shift," downTEState ",nTipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
+         //   Print(__FUNCTION__," shift ",_shift," downTEState ",nTipe.rightPrice," tip wavHTF: ",EnumToString(this.waveHTFPeriod));
         }
    this.Add(nTipe);
 // trend has a new element so update the pointer of trend elements array
@@ -769,7 +779,7 @@ void             Tip::updateTrendPointers()
    if(Total() == numDefineWave)
      {
       this.hasInitialised = true;
-     // Print(__FUNCTION__" ******** ",this.hasInitialised, " countInidicatorPulls ", this.countIndicatorPulls);
+      // Print(__FUNCTION__" ******** ",this.hasInitialised, " countInidicatorPulls ", this.countIndicatorPulls);
 
      }
   }

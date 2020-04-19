@@ -87,6 +87,7 @@ bool RatesFlow::addTips()
                  {
                   incUniqueID(1);
                   dTip = new DiagTip(tfDataTrend.tfColor[t],"diag_Line_"+IntegerToString(uniqueID));
+                  dTip.setParent(instrumentPointers[_ins].pContainerTip);
                   instrumentPointers[_ins].pContainerTip.Add(dTip);
                   arrowDrawOffSet+= 10;
                   dTip.initTip(instrumentPointers[_ins].symbol,numDefineWave,tfDataTrend.chartTF,tfDataTrend.useTF[t],tfDataTrend.tfColor[t],wCalcSizeType,atrRange,
@@ -163,7 +164,6 @@ bool              RatesFlow::initIndicatorsTick()
            }
         }
      }
-//   crash();
    return true;
   }
 // +------------------------------------------------------------------+
@@ -187,13 +187,14 @@ bool              RatesFlow::initInitialRatesSequence()
 bool              RatesFlow::initInitialRatesSequenceCTF()
   {
    int aSize=ArraySize(instrumentPointers)-1;
-   Tip* tip[1];
+   Tip* aTip[1];
    if(CheckPointer(tfDataAll)!=POINTER_INVALID)
      {
       for(int ins=0; ins<=aSize; ins++)
         {
-         this.getTip(ins, _Period, tip);
-         if(!callGetBrokerDataTrend(ins,_Period,tip[0].ratesCTF))
+         this.getTip(ins, _Period, aTip);
+         Tip *tip = aTip[0];
+         if(!callGetBrokerDataTrend(ins,_Period,tip.parent.ratesCTF))
            {
             Print(__FUNCTION__," returned false from ins/period: ",ins," ",_Period);
             return false;
@@ -468,8 +469,4 @@ bool RatesFlow::callGetBrokerDataTrend(int _ins, ENUM_TIMEFRAMES _TF, MqlRates &
    Print("");
    return true;
   }
-//+------------------------------------------------------------------+
-
-//+------------------------------------------------------------------+
-
 //+------------------------------------------------------------------+

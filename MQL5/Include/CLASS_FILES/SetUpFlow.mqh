@@ -154,8 +154,8 @@ void  SetUpFlow::runNewBarInstruments(int _ins)
          // NOW ALWAYS DO CHART BAR TF STUFF
          // TipElement *tipe =  this.GetLastNode();
          // need rates for calculating flexible ATR maybe -> calcATR set to dynamic
-         CopyRates(tip.symbol,_Period,0,101,tip.ratesCTF);
-         ArraySetAsSeries(tip.ratesCTF,true);
+         CopyRates(tip.symbol,_Period,0,101,tip.parent.ratesCTF);
+         ArraySetAsSeries(tip.parent.ratesCTF,true);
          //    if(isNewHTF(tip,0))
          //      {
          // Have a new bar so old trend suState may change - Calculate trend for this waveHTFperiod
@@ -223,26 +223,26 @@ setUpState              SetUpFlow::checkEntryTrigger(int _ins, int _shift)
    if(this.getSetUpState() == waiting_trigger_break_resistance)
      {
       // update the diagonal lines values
-      minorTrend.updateTrendPriceTime(minorTrend.ratesCTF[_shift].time);
-      //  int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.ratesCTF[_shift].time,true);
-      majorTrend.updateTrendPriceTime(majorTrend.ratesCTF[_shift].time);
+      minorTrend.updateTrendPriceTime(minorTrend.parent.ratesCTF[_shift].time);
+      //  int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
+      majorTrend.updateTrendPriceTime(majorTrend.parent.ratesCTF[_shift].time);
       // and check support line has been breached
-      if((minorTrend.ratesCTF[1].low > minorTrend.YVals[1])&&
-         (minorTrend.ratesCTF[1].open > majorTrend.YVals[1]))
-         //     (minorTrend.ratesCTF[1].low > MathMin(majorTrend.ratesHTF[1].low,majorTrend.ratesHTF[2].low)))
+      if((minorTrend.parent.ratesCTF[1].low > minorTrend.YVals[1])&&
+         (minorTrend.parent.ratesCTF[1].open > majorTrend.YVals[1]))
+         //     (minorTrend.parent.ratesCTF[1].low > MathMin(majorTrend.ratesHTF[1].low,majorTrend.ratesHTF[2].low)))
          this.setSetUpState(open_long);
      }
    else
       if(this.getSetUpState() == waiting_trigger_break_support)
         {
          // update the diagonal lines values
-         minorTrend.updateTrendPriceTime(minorTrend.ratesCTF[_shift].time);
-         //int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.ratesCTF[_shift].time,true);
-         majorTrend.updateTrendPriceTime(majorTrend.ratesCTF[_shift].time);
+         minorTrend.updateTrendPriceTime(minorTrend.parent.ratesCTF[_shift].time);
+         //int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
+         majorTrend.updateTrendPriceTime(majorTrend.parent.ratesCTF[_shift].time);
          // and check support line has been breached
-         if((minorTrend.ratesCTF[1].high < minorTrend.YVals[1])&&
-            (minorTrend.ratesCTF[1].open < majorTrend.YVals[1]))
-            //      (minorTrend.ratesCTF[1].high < MathMax(majorTrend.ratesHTF[1].high,majorTrend.ratesHTF[2].high)))
+         if((minorTrend.parent.ratesCTF[1].high < minorTrend.YVals[1])&&
+            (minorTrend.parent.ratesCTF[1].open < majorTrend.YVals[1]))
+            //      (minorTrend.parent.ratesCTF[1].high < MathMax(majorTrend.ratesHTF[1].high,majorTrend.ratesHTF[2].high)))
             this.setSetUpState(open_short);
         }
    return this.getSetUpState();
@@ -255,8 +255,8 @@ void SetUpFlow::outTipStates(int _ins, string _action,int _shift,int _count)
    DiagTip *minorTrend = instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
    DiagTip *majorTrend = instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
    Print("shift: ",_shift);
-// int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.ratesCTF[_shift].time,true);
-   Print(_count," ",_action," ",__FUNCTION__," shift: ",_shift," **** ",minorTrend.ratesCTF[_shift].time);
+// int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
+   Print(_count," ",_action," ",__FUNCTION__," shift: ",_shift," **** ",minorTrend.parent.ratesCTF[_shift].time);
    Print(" ",instrumentPointers[_ins].symbol, " Major ",EnumToString(majorTrend.waveHTFPeriod)," Major ", EnumToString(majorTrend.getTipState()));
    Print(" majorTrend.XTimes[0] ",majorTrend.XTimes[0]," majorTrend.YVals[0] ",majorTrend.YVals[0]);
    Print(" majorTrend.XTimes[1] ",majorTrend.XTimes[1]," majorTrend.YVals[1] ",majorTrend.YVals[1]);
@@ -452,7 +452,7 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
    if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_iTF))!= POINTER_INVALID)
      {
       rTip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_iTF);
-      int startCandle = MathMin(ArraySize(rTip.ratesCTF)-1,rTip.maxBarsDegugRun);
+      int startCandle = MathMin(ArraySize(rTip.parent.ratesCTF)-1,rTip.maxBarsDegugRun);
       Print(__FUNCTION__," index ",_iTF," startCandle  ",startCandle," start time: ",rTip.ratesThisTF[startCandle].time,"maxBarsDebugRun: ",rTip.maxBarsDegugRun);
       for(int shift = startCandle; shift>0; shift--)
         {
@@ -463,9 +463,9 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
          if(wCalcSizeType == waveCalcATR)
            {
             if(!rTip.atrWaveInfo.setWaveHeightPointsATR(rTip.onScreenWaveHeight,shift))
-               Print(__FUNCTION__," rTip.ratesCTF[shift].time: ",rTip.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Error: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
+               Print(__FUNCTION__," rTip.parent.ratesCTF[shift].time: ",rTip.parent.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Error: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
             //else
-             //  Print(__FUNCTION__," rTip.ratesCTF[shift].time: ",rTip.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Sucess: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
+             //  Print(__FUNCTION__," rTip.parent.ratesCTF[shift].time: ",rTip.parent.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Sucess: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
            }
          else
             rTip.atrWaveInfo.setWaveHeightPointsFixed(rTip.onScreenWaveHeight);
