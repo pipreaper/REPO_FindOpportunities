@@ -44,9 +44,7 @@ public:
    int               fontSize;
    // number of elements defining a wave
    int               numDefineWave;
-   // int               shift;
    int               startCTFShift;
-   //  int               startHTFShift;
    static int        uniqueID;
    int               digits;
    double            tickValue;
@@ -66,8 +64,6 @@ public:
    TFTrendDataObj    *tfDataTrend;
    int               t;
    bool              showTrendWave;
-   // must be either trend data or volumes data
-   //  showWaveLabels    showWaveArmLabels;
    bool              showCongestion;
    bool              showPanel;
    bool              hasCycled;
@@ -75,11 +71,7 @@ public:
    string            fontType;
    trendState        tipState;
    ENUM_TIMEFRAMES   waveHTFPeriod;
-   // both set in ratesFlow
-   //chart tfs
    ContainerTip      *parent;
- //  MqlRates          parent.ratesCTF[];
-   // start and stop dates compatible with all HTFs used
    MqlRates          ratesThisTF[];
    int               numratesThisTF;
    int               numRatesCTF;
@@ -124,7 +116,7 @@ public:
    ENUM_LINE_STYLE   Tip::getLineStyle(trendState _trend);
    // get arrowStyle
    uchar             Tip::getArrowStyle(trendState _trend);
-   void              Tip::setParent(ContainerTip *p);
+   void              Tip::setParent(ContainerTip &_p);
    // check rates Bars are created
    bool              Tip::initTip(string _symbol,int _numDefineWave,int _chartPeriod,ENUM_TIMEFRAMES _waveHTFPeriod,color _clrLine,waveCalcSizeType _wCalcSizeType,int _atrRange,
                                   int _maPeriod,int _maAppliedPrice,int _minBars,int _maxBars,double _percentPullBack,double _atrMultiplier,double _scaleATR,
@@ -241,59 +233,10 @@ bool              Tip::initTip(string _symbol,int _numDefineWave,int _chartPerio
 //+------------------------------------------------------------------+
 //|Get the container of this tip                                     |
 //+------------------------------------------------------------------+
-void Tip::setParent(ContainerTip *p)
+void Tip::setParent(ContainerTip &_p)
   {
-   parent = p;
-  }
-// +------------------------------------------------------------------+
-// |Chart Bars are needed for evey Tip with a HTF on each             |
-// |instrument/Tip                                                    |
-// |Basically get the rates again that you could have                 |
-// |passed in from barflow but you dont have a tip to do that         |
-// +------------------------------------------------------------------+
-bool Tip::checkRateBarsAreSynced()
-  {
-//   int maxBarsHTF = -1;
-//   int maxBarsCTF=-1;
-////Get Rates need access to inital ratesThisTF for this symbol TF retrieved successfully in BarFlow.setInitRatesSequence
-//   if(!MQLInfoInteger(MQL_TESTER))
-//     {
-//      // attempt to override the past in params
-//      maxBarsHTF = Bars(symbol,waveHTFPeriod);
-//      maxBarsCTF = Bars(symbol,_Period);
-//      numratesThisTF=CopyRates(symbol,waveHTFPeriod,0,maxBarsHTF,ratesThisTF);
-//      numRatesCTF=CopyRates(symbol,_Period,0,maxBarsCTF,parent.parent.ratesCTF);
-//     }
-//   else
-//     {
-//      //***** Testing parmameters from ST fed to ratesThisTFArray *****
-//      //Will Auto Download the History Data it needs to do a run
-//      //According to the parameters you give it in CopyRates - dates or counts
-//      maxBarsHTF = Bars(symbol,waveHTFPeriod);
-//      maxBarsCTF = Bars(symbol,_Period);
-//      numratesThisTF=CopyRates(symbol,waveHTFPeriod,0,maxBarsHTF,ratesThisTF);
-//      numRatesCTF=CopyRates(symbol,_Period,0,maxBarsCTF,parent.ratesCTF);
-//     }
-// calculate start available for  HTF
-// int periodSecondsTF=PeriodSeconds();
-//  int periodSecondsHTF=PeriodSeconds(waveHTFPeriod);
-//  int periodRatio=periodSecondsHTF/periodSecondsTF;
-//  ArraySetAsSeries(parent.ratesCTF,true);
-//  ArraySetAsSeries(ratesThisTF,true);
-// CTF must start here to capture 1000 HTF bars -> 1000 Bars is considered enough to capture trend (if not fails to initialise)
-//  startCTFShift = (periodRatio*maxBarsDegugRun) + 1;
-// if we dont have a 1000 bars then whats the maximum
-//  if((numRatesCTF-1) < startCTFShift)
-//     startCTFShift = numRatesCTF-1;
-//  CopyRates(symbol,_Period,0,startCTFShift,parent.ratesCTF);
-// Calculate HTF rates Array
-// get time of start CTF to satisfy HTF (calc above)
-//  datetime startTimeCTF = parent.ratesCTF[startCTFShift-1].time;
-// so find time HTF
-//startHTFShift=iBarShift(symbol,waveHTFPeriod,startTimeCTF,true);
-//CopyRates(symbol,waveHTFPeriod,0,startHTFShift,ratesThisTF);
-// datetime startTimeHTF = ratesThisTF[startHTFShift-1].time;
-   return true;
+  // parent = p;
+   parent = GetPointer(_p); 
   }
 // +------------------------------------------------------------------+
 // |Destructor: Destroy Tip                                           |
@@ -318,15 +261,6 @@ bool Tip::addIndicators(void)
 //  cciWaveInfo  = new CCIWaveInfo(symbol,waveHTFPeriod,cciPeriod,cciAppliedPrice,"TRD");
 //  cciWaveInfo.CCISetWaveInfo(cciTriggerLevel, cciExitLevel);
    emaInfo= new EMAInfo(symbol,waveHTFPeriod,emaTrendPeriod,emaTrendShift,emaTrendMethod,emaTrendAppliedPrice,"TRD");
-//Keep doing init strategy(10) ... wait for indicator values on trend (ATR of atrWaveinfo) .... and others to be used later above?
-//double atrArr[];
-//if(CopyBuffer(atrWaveInfo.atrHandle,0,0,1,atrArr) <= 0)
-//  {
-//   Print(CopyBuffer(atrWaveInfo.atrHandle,0,0,1,atrArr));
-//   return false;
-//  }
-//  else
-//  Print("number of ATR elements: ",EnumToString(this.waveHTFPeriod)," : ",CopyBuffer(atrWaveInfo.atrHandle,0,0,1,atrArr));
    return true;
   }
 // +------------------------------------------------------------------+
@@ -711,54 +645,6 @@ void             Tip:: reduceNumTipElements(int acceptibleNumTip = 20)
         }
      }
   }
-// +--------------------------------------------------------------------------------------+
-// |runTrendTick()                                                                        |
-// |1/. Its a new chart Bar for HTF under consideration                                   |
-// |2/. establish up to date ratesThisTF array                                               |
-// +--------------------------------------------------------------------------------------+
-//bool             Tip::runTimeTrendUpdate()
-//  {
-////// make 30 rates available for all subsequent calculations on tip's
-////   int xRates = 30;
-////   ArrayResize(ratesThisTF,xRates);
-////   int cnt=0;
-////   do
-////     {
-////      cnt+=1;
-////      if(cnt>30)
-////        {
-////         Print(__FUNCTION__," ",symbol," ",waveHTFPeriod," failed to get Rates");
-////         return false;
-////        }
-////      Sleep(1);
-////     }
-////   while(CopyRates(symbol,waveHTFPeriod,0, xRates, ratesThisTF)!=xRates);
-////   ArraySetAsSeries(ratesThisTF,true);// series same as indexes: 0 least recent
-//   processTrendBar();
-//   return true;
-//  }
-// +------------------------------------------------------------------+
-// | setArrowCode                                                     |
-// +------------------------------------------------------------------+
-//uchar             Tip::setArrowCode(trendState _trend)
-//  {
-//   arrowCode=nullArrow;
-//   switch(_trend)
-//     {
-//      case congested:
-//         arrowCode = cArrow;
-//         break;
-//      case  up  :
-//         arrowCode=uArrow;
-//         break;
-//      case down  :
-//         arrowCode=dArrow;
-//         break;
-//      default  :
-//         Alert(__FUNCTION__+" Failure");
-//     }
-//   return arrowCode;
-//  }
 // +------------------------------------------------------------------+
 // | updateTrendPointers:  Set array of object Tip pointer |
 // | for ease of access                                               |
@@ -780,31 +666,8 @@ void             Tip::updateTrendPointers()
      {
       this.hasInitialised = true;
       // Print(__FUNCTION__" ******** ",this.hasInitialised, " countInidicatorPulls ", this.countIndicatorPulls);
-
      }
   }
-//// +------------------------------------------------------------------+
-//// | caclTrendParams                                                  |
-//// +------------------------------------------------------------------+
-//void Tip::calcTrendParams(color _clr,int  _newestIndex,int _midIndex, int  _oldestIndex)
-//  {
-////   datetime dateArray[1];
-////   int index = -1;
-////// NEWEST:
-////   datetime dNewest =tipePntrs[_newestIndex].tLineCurrPrevValues.extremeDate;
-////   double pNewest = tipePntrs[_newestIndex].tLineCurrPrevValues.rightValue;
-////// MIDWAY:
-////   datetime dMidway =tipePntrs[_midIndex].tLineCurrPrevValues.extremeDate;
-////   double pMidway = tipePntrs[_midIndex].tLineCurrPrevValues.rightValue;
-////// OLDEST:
-////   datetime dOldest =tipePntrs[_oldestIndex].tLineCurrPrevValues.extremeDate;
-////   double pOldest = tipePntrs[_oldestIndex].tLineCurrPrevValues.rightValue;
-////// create support resistance lines
-////   uniqueID++;
-//////isDate(_Symbol,_Period,shift+1,0,19,11,1,2019,false);
-////   this.cdtl.AddLine(pNewest,pMidway,pOldest,dNewest,dMidway,dOldest,_clr,string(uniqueID)+"_"+EnumToString(waveHTFPeriod),this.getCurrTip());//tipePntrs[2].clr
-////   ChartRedraw();
-//  }
 //+------------------------------------------------------------------+
 //| initPanelScreenVar                                               |
 //+------------------------------------------------------------------+
@@ -898,25 +761,6 @@ void              Tip::cleanTrend()
      }
   }
 // +------------------------------------------------------------------+
-// |cleanLabels Remove a Tip Labels                                   |
-// +------------------------------------------------------------------+
-//void              Tip::cleanLabels()
-//  {
-//   if(GetPointer(this)!=NULL)
-//     {
-//      if(ObjectFind(0,this.onScreenArrowLabel)>=0)
-//         ObjectDelete(0,this.onScreenArrowLabel);
-//      if(ObjectFind(0,this.onScreenDesc)>=0)
-//         ObjectDelete(0,this.onScreenDesc);
-//      if(ObjectFind(0,this.onScreenWaveHeight)>=0)
-//         ObjectDelete(0,this.onScreenWaveHeight);
-//      if(ObjectFind(0,this.onScreenSymbol)>=0)
-//         ObjectDelete(0,this.onScreenSymbol);
-//     }
-//   else
-//      Print(__FUNCTION__," NULL Tip POINTER!");
-//  }
-// +------------------------------------------------------------------+
 // |To Log: last node to print is most current                        |
 // +------------------------------------------------------------------+
 void              Tip::ToLog(string desc,bool show)
@@ -940,4 +784,3 @@ void              Tip::ToLog(string desc,bool show)
 // --- Initialization of static members of the Parser class at the global level
 int               Tip::uniqueID=0;
 // +------------------------------------------------------------------+
-//+------------------------------------------------------------------+

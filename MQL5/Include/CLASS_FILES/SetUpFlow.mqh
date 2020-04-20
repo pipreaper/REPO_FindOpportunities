@@ -453,7 +453,7 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
      {
       rTip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_iTF);
       int startCandle = MathMin(ArraySize(rTip.parent.ratesCTF)-1,rTip.maxBarsDegugRun);
-      Print(__FUNCTION__," index ",_iTF," startCandle  ",startCandle," start time: ",rTip.ratesThisTF[startCandle].time,"maxBarsDebugRun: ",rTip.maxBarsDegugRun);
+      Print(__FUNCTION__," ",instrumentPointers[_ins].symbol," Index ",_iTF," TF: ",EnumToString(rTip.waveHTFPeriod)," Initialising With: ",startCandle," Bars, Start Time: ",rTip.ratesThisTF[startCandle].time," Max Bars Want For Run: ",rTip.maxBarsDegugRun);
       for(int shift = startCandle; shift>0; shift--)
         {
          rTip.countIndicatorPulls += 1;

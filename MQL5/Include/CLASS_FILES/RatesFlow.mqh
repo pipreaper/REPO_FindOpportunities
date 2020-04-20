@@ -159,7 +159,7 @@ bool              RatesFlow::initIndicatorsTick()
               {
                //for(int i = ArraySize(tempGetAtrValues)-1; i >0 ; i--)
                // Print(i," ",tempGetAtrValues[i]);
-               Print(__FUNCTION__," found       atr values -> want: ",startCandle, "  found: ",CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,startCandle, tempGetAtrValues)," ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));
+               Print(__FUNCTION__," ATR Values, Want: ",startCandle, " Bars,  Found: ",CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,startCandle, tempGetAtrValues)," Bars ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));
               }
            }
         }
@@ -290,11 +290,11 @@ bool  RatesFlow::initTips()
          if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index))!= POINTER_INVALID)
            {
             dTip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index);
-            if(!dTip.checkRateBarsAreSynced())
-              {
-               conditionTrend=false;
-               break;
-              }
+            //if(!dTip.checkRateBarsAreSynced())
+            //  {
+            //   conditionTrend=false;
+            //   break;
+            //  }
             // check instrument has quotes data to proceed
             if(!instrumentPointers[_ins].Refresh())
               {
@@ -430,12 +430,7 @@ bool RatesFlow::callGetBrokerDataTrend(int _ins, ENUM_TIMEFRAMES _TF, MqlRates &
          Print(__FUNCTION__," Failed to Navigate data from charts");
          return false;
         }
-
-
       numRates=CopyRates(instrumentPointers[_ins].symbol,_TF,0,barsFound,_tipRates);
-
-
-
       if(numRates < MathMax(MathMax(minBarsDegugRunTrend,minBarsDegugRunLevel),minBarsDegugRunVolume))
         {
          DebugBreak();
