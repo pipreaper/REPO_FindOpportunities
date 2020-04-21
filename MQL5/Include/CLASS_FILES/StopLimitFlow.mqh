@@ -15,8 +15,9 @@ public:
    string            catType;
                      StopLimitFlow();
                     ~StopLimitFlow();
-   //   bool              StopLimitFlow::isNear();
+   //bool              StopLimitFlow::isNear();
    //bool              StopLimitFlow::process(simState _catThis, int _ins);
+   bool              StopLimitFlow::haveLimitATR();
    bool              StopLimitFlow::openBuySellMarketOrder(simState _catThis, int _ins);
    bool              StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins);
    double            StopLimitFlow::selectTarget(int _ins, double _entryPrice,double _sl,ENUM_ORDER_TYPE _bs);
@@ -30,6 +31,34 @@ StopLimitFlow::StopLimitFlow() {}
 //|                                                                  |
 //+------------------------------------------------------------------+
 StopLimitFlow::~StopLimitFlow() {}
+//+------------------------------------------------------------------+
+//|Check atr limit has data                                          |
+//+------------------------------------------------------------------+
+bool              StopLimitFlow::haveLimitATR()
+  {
+   double tempGetAtrValues[];
+   int startCandle = -1;
+   for(int ins=0; (ins<ArraySize(this.instrumentPointers)); ins++)
+     {
+      if(instrumentPointers[ins].pContainerTip.Total()>0)
+        {
+         for(int instrumentTrend=0; (instrumentTrend<instrumentPointers[ins].pContainerTip.Total()); instrumentTrend++)
+           {
+            Tip *tip = instrumentPointers[ins].pContainerTip.GetNodeAtIndex(instrumentTrend);
+            if((CheckPointer(tip)!=POINTER_INVALID) && (tip.waveHTFPeriod == instrumentPointers[ins].atrLimit.waveHTFPeriod))
+              {
+               startCandle = MathMin(ArraySize(tip.ratesThisTF)-1,this.maxBarsDegugRunTrend);
+               if(CopyBuffer(instrumentPointers[ins].atrLimit.atrHandle,0,0,startCandle, tempGetAtrValues) < startCandle)
+                 {
+                  Print(__FUNCTION__," couldnt get atr values *ATRLIMIT -> want: ",startCandle, "  found: ",CopyBuffer(instrumentPointers[ins].atrLimit.atrHandle,0,0,startCandle, tempGetAtrValues)," ",instrumentPointers[ins].symbol," ",EnumToString(instrumentPointers[ins].atrLimit.waveHTFPeriod));
+                  return false;
+                 }
+              }
+           }
+        }
+     }
+   return true;
+  }
 //+------------------------------------------------------------------+
 //| has bigger range than the previous (x) ~10 candles               |
 //+------------------------------------------------------------------+
@@ -217,7 +246,7 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
             Print(__FUNCTION__, " lots <= zero: ", instrumentPointers[_ins].Name());
         }
    return condition;
-  }  
+  }
 // +------------------------------------------------------------------+
 // | openBuyStopOrder                                                 |
 // +------------------------------------------------------------------+
@@ -339,28 +368,28 @@ double              StopLimitFlow::selectTarget(int _ins, double _entryPrice,dou
 //uses bids
 // instrumentPointers[_ins].Name();
 // iterate the (3) levels that are available from MonitorFlow module
-   //for(int x=1; (x<ArraySize(currLipe)); x++)
-   //  {
-   //   if(currLipe[x].levelPrice != 0)
-   //     {
-   //      // Check if @ least 1:1 ratio
-   //      if((MathAbs(_entryPrice-currLipe[x].levelPrice)/MathAbs(_entryPrice - _sl)) > 1)
-   //         return currLipe[x].levelPrice;
-   //     }
-   //   else
+//for(int x=1; (x<ArraySize(currLipe)); x++)
+//  {
+//   if(currLipe[x].levelPrice != 0)
+//     {
+//      // Check if @ least 1:1 ratio
+//      if((MathAbs(_entryPrice-currLipe[x].levelPrice)/MathAbs(_entryPrice - _sl)) > 1)
+//         return currLipe[x].levelPrice;
+//     }
+//   else
+     {
+      // Attempt setByATR
+      double TP = setByATR(_ins,_entryPrice,_sl, _bs,_Period);
+      // Check if @ least 1:1 ratio
+      if((MathAbs(_entryPrice-tp)/MathAbs(_entryPrice - _sl)) > 1)
+         return TP;
+      else
         {
-         // Attempt setByATR
-         double TP = setByATR(_ins,_entryPrice,_sl, _bs,_Period);
-         // Check if @ least 1:1 ratio
-         if((MathAbs(_entryPrice-tp)/MathAbs(_entryPrice - _sl)) > 1)
-            return TP;
-         else
-           {
-            Print(__FUNCTION__, " ATR value for tp: ",NormalizeDouble(tp,instrumentPointers[_ins].Digits()), " is less than 1:1 ratio ");
-            return 0.0;
-           }
+         Print(__FUNCTION__, " ATR value for tp: ",NormalizeDouble(tp,instrumentPointers[_ins].Digits()), " is less than 1:1 ratio ");
+         return 0.0;
         }
-   //  }
+     }
+//  }
    Print(__FUNCTION__, "ArraySize(currLipe) <= 0: ",ArraySize(currLipe));
    return 0.0;
   }

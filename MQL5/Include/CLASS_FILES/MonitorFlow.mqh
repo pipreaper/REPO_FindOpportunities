@@ -22,7 +22,7 @@ class MonitorFlow : public TradeFlow
   {
 public:
    LipElement        currLipe[];
-//   bool              MonitorFlow::setChartInsBars(int _ins, int _reqBars);
+   //   bool              MonitorFlow::setChartInsBars(int _ins, int _reqBars);
    void              MonitorFlow::MonitorFlow();
    void              MonitorFlow::~MonitorFlow();
    //  trendState        MonitorFlow::trendGetState(int _ins, int _index);

@@ -12,8 +12,6 @@ class RatesFlow : public BarFlow
   {
 private:
 public:
-   // MqlRates ratesHTF[];
-   //  MqlRates ratesChartBars[];
    int               minBarsDegugRunTrend;
    int               maxBarsDegugRunTrend;
    int               minBarsDegugRunLevel;
@@ -23,13 +21,7 @@ public:
                      RatesFlow();
                     ~RatesFlow();
    bool              RatesFlow::addTips();
-   void              RatesFlow::initRatesFlow(
-      int _minBarsDegugRunTrend,
-      int               _maxBarsDegugRunTrend,
-      int               _minBarsDegugRunLevel,
-      int               _maxBarsDegugRunLevel,
-      int               _minBarsDegugRunVolume,
-      int               _maxBarsDegugRunVolume);
+   void              RatesFlow::initRatesFlow(int _minBarsDegugRunTrend,int _maxBarsDegugRunTrend, int _minBarsDegugRunLevel,int _maxBarsDegugRunLevel,int _minBarsDegugRunVolume,int _maxBarsDegugRunVolume);
    bool              RatesFlow::getTip(int _ins, ENUM_TIMEFRAMES _tf, Tip* &tip[]);
    bool              RatesFlow::initStratElements();
    bool              RatesFlow::initTips();
@@ -140,6 +132,8 @@ void RatesFlow::initRatesFlow(
 bool              RatesFlow::initIndicatorsTick()
   {
    Tip *rTip = NULL;
+   double tempGetAtrValues[];
+   int startCandle = -1;
    for(int ins=0; (ins<ArraySize(this.instrumentPointers)); ins++)
      {
       for(int iTF=0; iTF<ArraySize(this.tfDataTrend.useTF); iTF++)
@@ -148,8 +142,7 @@ bool              RatesFlow::initIndicatorsTick()
            {
             rTip=instrumentPointers[ins].pContainerTip.GetNodeAtIndex(iTF);
             // int initBars = int(MathRound(rTip.atrWaveInfo.atrRange*(PeriodSeconds(rTip.waveHTFPeriod)/PeriodSeconds(_Period))));
-            double tempGetAtrValues[];
-            int startCandle = MathMin(ArraySize(rTip.ratesThisTF)-1,rTip.maxBarsDegugRun);
+            startCandle = MathMin(ArraySize(rTip.ratesThisTF)-1,rTip.maxBarsDegugRun);
             if(CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,startCandle, tempGetAtrValues) < startCandle)
               {
                Print(__FUNCTION__," couldnt get atr values -> want: ",startCandle, "  found: ",CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,startCandle, tempGetAtrValues)," ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));

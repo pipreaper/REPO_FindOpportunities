@@ -113,7 +113,7 @@ public:
       bool                 _verboseOutputDetail);
    // increment the class variable
    void              BarFlow::incUniqueID(int _byInc);
-   bool              createInstruments(string &_symbolsList[]);
+   bool              createInstruments(string &_symbolsList[],int _atrLimitPeriod,ENUM_TIMEFRAMES _htfATR);
    //Detailed info on startup conditions
    void              outputAccountSettings(bool _vDetail);
    color             findColor(ENUM_TIMEFRAMES tf);
@@ -348,16 +348,17 @@ string              splitWindowString(string _sep, string _stringToSplit)
 // +------------------------------------------------------------------+
 // | createInstruments: return list of array pointers to instruments  |
 // +------------------------------------------------------------------+
-bool  BarFlow::createInstruments(string &_symbolsList[])
+bool  BarFlow::createInstruments(string &_symbolsList[],int _atrLimitPeriod,ENUM_TIMEFRAMES _htfATR)
   {
    bool condition =false;
    ArrayResize(instrumentPointers,ArraySize(_symbolsList));
    for(int p=0; p<=ArraySize(_symbolsList)-1; p++)
      {
-      Instrument *insPntr=new Instrument(_symbolsList[p]);
+      Instrument *insPntr=new Instrument();
       if(GetPointer(insPntr)!=NULL)
         {
          instrumentPointers[p]=insPntr;
+         insPntr.initInstrument(_symbolsList[p],_atrLimitPeriod, _htfATR);
          condition = true;
         }
       else

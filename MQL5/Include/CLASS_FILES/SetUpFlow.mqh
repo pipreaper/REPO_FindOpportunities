@@ -457,7 +457,7 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
       for(int shift = startCandle; shift>0; shift--)
         {
          rTip.countIndicatorPulls += 1;
-        // int initBars = int(MathRound(rTip.atrWaveInfo.atrRange*(PeriodSeconds(rTip.waveHTFPeriod)/PeriodSeconds(_Period))));
+         // int initBars = int(MathRound(rTip.atrWaveInfo.atrRange*(PeriodSeconds(rTip.waveHTFPeriod)/PeriodSeconds(_Period))));
          if(rTip.countIndicatorPulls <= rTip.atrRange)
             continue;
          if(wCalcSizeType == waveCalcATR)
@@ -465,7 +465,7 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
             if(!rTip.atrWaveInfo.setWaveHeightPointsATR(rTip.onScreenWaveHeight,shift))
                Print(__FUNCTION__," rTip.parent.ratesCTF[shift].time: ",rTip.parent.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Error: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
             //else
-             //  Print(__FUNCTION__," rTip.parent.ratesCTF[shift].time: ",rTip.parent.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Sucess: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
+            //  Print(__FUNCTION__," rTip.parent.ratesCTF[shift].time: ",rTip.parent.ratesCTF[shift].time, " rTip.ratesThisHTF[shift].time: ",rTip.ratesThisTF[shift].time," Sucess: waveHeightPts: ",rTip.atrWaveInfo.waveHeightPts, " pointSize ",rTip.atrWaveInfo.pointSize, " digits ",rTip.atrWaveInfo.digits);
            }
          else
             rTip.atrWaveInfo.setWaveHeightPointsFixed(rTip.onScreenWaveHeight);
