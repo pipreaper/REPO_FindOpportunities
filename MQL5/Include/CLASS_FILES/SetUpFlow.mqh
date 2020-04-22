@@ -301,7 +301,6 @@ bool SetUpFlow::process(simState _simThis,int _ins)
       // open big belt long
       if(lots > 0)
         {
-         //    double targetAsk= spread + selectTarget(_ins,instrumentPointers[_ins].Bid(),stopAsk,ORDER_TYPE_BUY);//entryAsk + 100*instrumentPointers[_ins].Point();
          if(stopTargetsArray[targetZone] != 0.0)
            {
             if(openBuyPosition(_ins,instrumentPointers[_ins].Bid(),lots,stopTargetsArray[0],stopTargetsArray[targetZone],catType))

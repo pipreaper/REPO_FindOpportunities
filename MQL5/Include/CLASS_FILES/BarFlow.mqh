@@ -59,7 +59,7 @@ public:
    int               emaTrendShift;
    ENUM_MA_METHOD    emaTrendMethod;
    ENUM_APPLIED_PRICE emaTrendAppliedPrice;
-   int               datumCandlesToExpire; // datum Candles
+   int               candlesToExpire; // datum Candles
    double            atrMultiplier;
    bool              showPanel;    // show Panel History
    int               onScreenVarLimit;      // Panel History Limit
@@ -84,6 +84,7 @@ public:
       int                  _sl,
       int                  _tp,
       int                  _deltaFireRoom,
+      int                  _candlesToExpire,      
       int                  _numDefineWave,
       waveCalcSizeType     _wCalcSizeType,
       int                  _atrRange,
@@ -152,6 +153,7 @@ bool BarFlow::initBarFlow(
    int               _sl,
    int               _tp,
    int               _deltaFireRoom,
+   int               _candlesToExpire,
    int               _numDefineWave,
    waveCalcSizeType  _wCalcSizeType,
    int               _atrRange,
@@ -187,6 +189,7 @@ bool BarFlow::initBarFlow(
    tp             =  _tp;
    dev = _dev;
    deltaFireRoom =_deltaFireRoom;
+      candlesToExpire=_candlesToExpire;   
    showPanel=_showPanel;
 // how many waves make a trend calculation(4)
    numDefineWave=_numDefineWave;

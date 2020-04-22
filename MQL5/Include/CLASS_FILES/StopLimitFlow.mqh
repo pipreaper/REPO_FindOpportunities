@@ -21,7 +21,7 @@ public:
    bool              StopLimitFlow::openBuySellMarketOrder(simState _catThis, int _ins);
    bool              StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins);
    double            StopLimitFlow::selectTarget(int _ins, double _entryPrice,double _sl,ENUM_ORDER_TYPE _bs);
-   double            StopLimitFlow::setByATR(int _ins, double _entryPrice,double _sl,ENUM_ORDER_TYPE _bs, ENUM_TIMEFRAMES _period);
+   double            StopLimitFlow::setByATR(int _ins, double _entryPrice,double _sl,ENUM_ORDER_TYPE _bs);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -175,9 +175,10 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
    if(_simThis == simLong)
      {
       double spread = instrumentPointers[_ins].Spread()*instrumentPointers[_ins].Point();
-      double clearance  = 0;//myTrade.deltaFireRoom * instrumentPointers[_ins].Point();
-      double entryAsk   = instrumentPointers[_ins].pContainerTip.ratesCTF[1].high + spread + clearance;
-      double stopAsk    = spread + instrumentPointers[_ins].pContainerTip.ratesCTF[1].low - clearance; // entryAsk - 100 * instrumentPointers[_ins].Point();
+      double clearance  = deltaFireRoom * instrumentPointers[_ins].Point();
+      DiagTip *majorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
+      double entryAsk   = majorTrend.ratesThisTF[1].high + spread + clearance;
+      double stopAsk    = spread + majorTrend.ratesThisTF[1].low - clearance;
       if(entryAsk<instrumentPointers[_ins].Bid())
         {
          Print(__FUNCTION__," entry price less than bid price");
@@ -188,11 +189,11 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
       // open big belt long
       if(lots > 0)
         {
-         double targetAsk= spread + selectTarget(_ins,entryAsk,stopAsk,ORDER_TYPE_BUY);//entryAsk + 100*instrumentPointers[_ins].Point();
+         double targetAsk = spread + selectTarget(_ins,entryAsk,stopAsk,ORDER_TYPE_BUY);
          if(targetAsk != 0.0)
            {
             // 3 candles because _Period in seconds ?
-            datetime expireTime = TimeTradeServer() + (datumCandlesToExpire * _Period * 60);
+            datetime expireTime = TimeTradeServer() + (candlesToExpire * _Period * 60);
             if(openBuyStopOrder(_ins,entryAsk,lots,stopAsk,targetAsk,expireTime,catType))
                condition = true;
             else
@@ -213,9 +214,10 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
    else
       if(_simThis == simShort)
         {
-         double clearance = 0;// myTrade.deltaFireRoom * instrumentPointers[_ins].Point();
-         double entryBid = instrumentPointers[_ins].pContainerTip.ratesCTF[1].low - clearance;
-         double stopBid = instrumentPointers[_ins].pContainerTip.ratesCTF[1].high + clearance;//entryBid+100*instrumentPointers[_ins].Point();
+         DiagTip *majorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
+         double clearance = deltaFireRoom * instrumentPointers[_ins].Point();
+         double entryBid = majorTrend.ratesThisTF[1].low - clearance;
+         double stopBid = majorTrend.ratesThisTF[1].high + clearance;
          if(entryBid>instrumentPointers[_ins].Bid())
            {
             Print(__FUNCTION__," entry price less than bid price");
@@ -230,7 +232,7 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
             if(targetBid != 0.0)
               {
                // 3 candles because _Period in seconds ?
-               datetime expireTime = TimeTradeServer() + (datumCandlesToExpire * _Period * 60);
+               datetime expireTime = TimeTradeServer() + (candlesToExpire * PeriodSeconds(_Period));
                if(openSellStopOrder(_ins,entryBid,lots,stopBid,targetBid,expireTime,catType))
                   condition = true;
                else
@@ -379,7 +381,7 @@ double              StopLimitFlow::selectTarget(int _ins, double _entryPrice,dou
 //   else
      {
       // Attempt setByATR
-      double TP = setByATR(_ins,_entryPrice,_sl, _bs,_Period);
+      double TP = setByATR(_ins,_entryPrice,_sl, _bs);
       // Check if @ least 1:1 ratio
       if((MathAbs(_entryPrice-tp)/MathAbs(_entryPrice - _sl)) > 1)
          return TP;
@@ -396,45 +398,22 @@ double              StopLimitFlow::selectTarget(int _ins, double _entryPrice,dou
 //+------------------------------------------------------------------+
 //|setByATR                                                          |
 //+------------------------------------------------------------------+
-double StopLimitFlow::setByATR(int _ins, double _entryPrice,double _sl,ENUM_ORDER_TYPE _bs, ENUM_TIMEFRAMES _period)
+double StopLimitFlow::setByATR(int _ins, double _entryPrice,double _sl,ENUM_ORDER_TYPE _bs)
   {
-// 1. get the atr handle for the chart tf
-// 2. establish if have values and set if found
-// 3. else use values to calculate profit target 3*ATR
-   ATRInfo *atr = NULL;
-   if(instrumentPointers[_ins].pContainerLip.Total()>0)
+   double atrVals[];
+   if(CheckPointer(instrumentPointers[_ins].atrLimit)!=POINTER_INVALID)
      {
-      // ** CHECK FOR NEW TREND DATA FOR EACH ACTIVE PERIOD
-      for(int instrumentTrend=0; (instrumentTrend<instrumentPointers[_ins].pContainerLip.Total()); instrumentTrend++)
+      ATRInfo *atr = instrumentPointers[_ins].atrLimit;
+      if(CopyBuffer(atr.atrHandle, 0,1,1, atrVals) < 0)
+         Print(__FUNCTION__, "Failed To Get Indicator Value: ",_ins," HTF2 Period ",atr.waveHTFPeriod);
+      else
         {
-         if(CheckPointer(instrumentPointers[_ins].pContainerLip.GetNodeAtIndex(instrumentTrend))!=POINTER_INVALID)
-           {
-            atr = instrumentPointers[_ins].pContainerLip.GetNodeAtIndex(instrumentTrend);
-            if(atr.waveHTFPeriod == _period)
-              {
-               int numValues = CopyBuffer(atr.atrHandle, 0,1,1, atr.atrWrapper.atrValue);
-               if(numValues < 0)
-                 {
-                  Print(__FUNCTION__, "failed to get indicator value: ",_ins," _Period ",_period);
-                  return 0.0;
-                 }
-               else
-                 {
-                  // set target
-                  if(_bs == ORDER_TYPE_BUY)
-                    {
-                     double TP = _entryPrice+3*atr.atrWrapper.atrValue[0];
-                     return TP;
-                    }
-                  else
-                     if(_bs == ORDER_TYPE_SELL)
-                       {
-                        double TP = _entryPrice-3*atr.atrWrapper.atrValue[0];
-                        return TP;
-                       }
-                 }
-              }
-           }
+         // set target
+         if(_bs == ORDER_TYPE_BUY)
+            return(_entryPrice + tp*atrVals[0]);
+         else
+            if(_bs == ORDER_TYPE_SELL)
+               return(_entryPrice - tp*atrVals[0]);
         }
      }
    return 0.0;
