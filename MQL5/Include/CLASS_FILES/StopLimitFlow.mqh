@@ -171,12 +171,13 @@ bool StopLimitFlow::openBuySellMarketOrder(simState _simThis,int _ins)
 //+------------------------------------------------------------------+
 bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
   {
+  DiagTip *majorTrend=NULL;
    bool condition = false;
    if(_simThis == simLong)
      {
       double spread = instrumentPointers[_ins].Spread()*instrumentPointers[_ins].Point();
       double clearance  = deltaFireRoom * instrumentPointers[_ins].Point();
-      DiagTip *majorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
+      majorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
       double entryAsk   = majorTrend.ratesThisTF[1].high + spread + clearance;
       double stopAsk    = spread + majorTrend.ratesThisTF[1].low - clearance;
       if(entryAsk<instrumentPointers[_ins].Bid())
@@ -193,7 +194,7 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
          if(targetAsk != 0.0)
            {
             // 3 candles because _Period in seconds ?
-            datetime expireTime = TimeTradeServer() + (candlesToExpire * _Period * 60);
+            datetime expireTime = TimeTradeServer() + (candlesToExpire* (PeriodSeconds(majorTrend.waveHTFPeriod)/PeriodSeconds(_Period)) * _Period * 60);
             if(openBuyStopOrder(_ins,entryAsk,lots,stopAsk,targetAsk,expireTime,catType))
                condition = true;
             else
@@ -214,7 +215,7 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
    else
       if(_simThis == simShort)
         {
-         DiagTip *majorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
+         majorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
          double clearance = deltaFireRoom * instrumentPointers[_ins].Point();
          double entryBid = majorTrend.ratesThisTF[1].low - clearance;
          double stopBid = majorTrend.ratesThisTF[1].high + clearance;

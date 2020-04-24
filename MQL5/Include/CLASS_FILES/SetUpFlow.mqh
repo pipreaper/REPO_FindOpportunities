@@ -448,15 +448,14 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
   {
    Tip *rTip=NULL;
    bool condition = false;
+   int startCandle =-1;
    if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_iTF))!= POINTER_INVALID)
      {
       rTip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_iTF);
-      int startCandle = MathMin(ArraySize(rTip.parent.ratesCTF)-1,rTip.maxBarsDegugRun);
-      Print(__FUNCTION__," ",instrumentPointers[_ins].symbol," Index ",_iTF," TF: ",EnumToString(rTip.waveHTFPeriod)," Initialising With: ",startCandle," Bars, Start Time: ",rTip.ratesThisTF[startCandle].time," Max Bars Want For Run: ",rTip.maxBarsDegugRun);
+      startCandle = MathMin(ArraySize(rTip.parent.ratesCTF)-1,rTip.maxBarsDegugRun);
       for(int shift = startCandle; shift>0; shift--)
         {
          rTip.countIndicatorPulls += 1;
-         // int initBars = int(MathRound(rTip.atrWaveInfo.atrRange*(PeriodSeconds(rTip.waveHTFPeriod)/PeriodSeconds(_Period))));
          if(rTip.countIndicatorPulls <= rTip.atrRange)
             continue;
          if(wCalcSizeType == waveCalcATR)
@@ -478,6 +477,8 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
 // if this tip has not initialised then whole process fails
    if(!condition)
       return condition;
+   else
+      Print(__FUNCTION__," ",instrumentPointers[_ins].symbol," Index ",_iTF," TF: ",EnumToString(rTip.waveHTFPeriod)," Initialising With: ",startCandle," Bars, Start Time: ",rTip.ratesThisTF[startCandle].time," Max Bars Want For Run: ",rTip.maxBarsDegugRun);
 // condition is now true
 // *** LEVELS ***
    for(int index = 0 ; index < instrumentPointers[_ins].pContainerLip.Total(); index++)
