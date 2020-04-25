@@ -166,12 +166,13 @@ bool StopLimitFlow::openBuySellMarketOrder(simState _simThis,int _ins)
         }
    return condition;
   }
+
 //+------------------------------------------------------------------+
 //| open an Entry order                                              |
 //+------------------------------------------------------------------+
 bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
   {
-  DiagTip *majorTrend=NULL;
+   DiagTip *majorTrend=NULL;
    bool condition = false;
    if(_simThis == simLong)
      {
@@ -194,8 +195,8 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
          if(targetAsk != 0.0)
            {
             // 3 candles because _Period in seconds ?
-            datetime expireTime = TimeTradeServer() + (candlesToExpire* (PeriodSeconds(majorTrend.waveHTFPeriod)/PeriodSeconds(_Period)) * _Period * 60);
-            if(openBuyStopOrder(_ins,entryAsk,lots,stopAsk,targetAsk,expireTime,catType))
+            datetime eTime = expireTime(candlesToExpire,_ins,TimeTradeServer());// = TimeTradeServer() + (candlesToExpire* (PeriodSeconds(majorTrend.waveHTFPeriod)/PeriodSeconds(_Period)) * _Period * 60);
+            if(openBuyStopOrder(_ins,entryAsk,lots,stopAsk,targetAsk,eTime,catType))
                condition = true;
             else
                condition = false;
@@ -233,8 +234,8 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
             if(targetBid != 0.0)
               {
                // 3 candles because _Period in seconds ?
-               datetime expireTime = TimeTradeServer() + (candlesToExpire * PeriodSeconds(_Period));
-               if(openSellStopOrder(_ins,entryBid,lots,stopBid,targetBid,expireTime,catType))
+               datetime eTime = expireTime(candlesToExpire,_ins,TimeTradeServer());
+               if(openSellStopOrder(_ins,entryBid,lots,stopBid,targetBid,eTime,catType))
                   condition = true;
                else
                   condition = false;
