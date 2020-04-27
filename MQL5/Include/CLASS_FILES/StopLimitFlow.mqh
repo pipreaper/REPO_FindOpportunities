@@ -109,11 +109,11 @@ bool              StopLimitFlow::haveLimitATR()
 bool StopLimitFlow::openBuySellMarketOrder(simState _simThis,int _ins)
   {
    bool condition = false;
-   DiagTip *majorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
+   DiagTip *minorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
    if(_simThis == simLong)
      {
       double openAsk   = this.instrumentPointers[_ins].Ask();
-      double buyStop =  MathMin(MathMin(majorTrend.ratesThisTF[1].low,majorTrend.ratesThisTF[2].low), majorTrend.ratesThisTF[0].low);
+      double buyStop =  MathMin(MathMin(minorTrend.ratesThisTF[1].low,minorTrend.ratesThisTF[2].low), minorTrend.ratesThisTF[0].low);
       buyStop = buyStop - deltaFireRoom * instrumentPointers[_ins].Point();
       buyStop = NormalizeDouble(buyStop,instrumentPointers[_ins].Digits());
       if(openAsk <= buyStop)
@@ -124,7 +124,7 @@ bool StopLimitFlow::openBuySellMarketOrder(simState _simThis,int _ins)
       double lots = CheckOpenLong(_ins,openAsk,buyStop);
       if(lots > this.instrumentPointers[_ins].LotsMin())
         {
-         double buyTarget = openAsk + this.tp*(MathMax(majorTrend.atrWaveInfo.atrWrapper.atrValue[0], (openAsk - buyStop)));
+         double buyTarget = openAsk + this.tp*(MathMax(minorTrend.atrWaveInfo.atrWrapper.atrValue[0], (openAsk - buyStop)));
          buyTarget = buyTarget+instrumentPointers[_ins].Spread()* instrumentPointers[_ins].Point();
          if(this.myTrade.Buy(lots,instrumentPointers[_ins].symbol,openAsk,buyStop,buyTarget))
             condition = true;
@@ -141,7 +141,7 @@ bool StopLimitFlow::openBuySellMarketOrder(simState _simThis,int _ins)
       if(_simThis == simShort)
         {
          double openBid    = this.instrumentPointers[_ins].Bid();
-         double sellStop = MathMax(MathMax(majorTrend.ratesThisTF[1].high,majorTrend.ratesThisTF[2].high),majorTrend.ratesThisTF[0].high);
+         double sellStop = MathMax(MathMax(minorTrend.ratesThisTF[1].high,minorTrend.ratesThisTF[2].high),minorTrend.ratesThisTF[0].high);
          sellStop = sellStop + this.instrumentPointers[_ins].Spread()* instrumentPointers[_ins].Point() + deltaFireRoom * instrumentPointers[_ins].Point();
          sellStop = NormalizeDouble(sellStop,instrumentPointers[_ins].Digits());
          if(openBid >= sellStop)
@@ -152,7 +152,7 @@ bool StopLimitFlow::openBuySellMarketOrder(simState _simThis,int _ins)
          double lots = CheckOpenShort(_ins,openBid,sellStop);
          if(lots > this.instrumentPointers[_ins].LotsMin())
            {
-            double sellTarget = openBid - this.tp*(MathMax(majorTrend.atrWaveInfo.atrWrapper.atrValue[0],(sellStop-openBid)));
+            double sellTarget = openBid - this.tp*(MathMax(minorTrend.atrWaveInfo.atrWrapper.atrValue[0],(sellStop-openBid)));
             if(this.myTrade.Sell(lots,instrumentPointers[_ins].symbol,openBid,sellStop,sellTarget))
                condition = true;
             else
@@ -172,15 +172,15 @@ bool StopLimitFlow::openBuySellMarketOrder(simState _simThis,int _ins)
 //+------------------------------------------------------------------+
 bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
   {
-   DiagTip *majorTrend=NULL;
+   DiagTip *minorTrend=NULL;
    bool condition = false;
    if(_simThis == simLong)
      {
       double spread = instrumentPointers[_ins].Spread()*instrumentPointers[_ins].Point();
       double clearance  = deltaFireRoom * instrumentPointers[_ins].Point();
-      majorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
-      double entryAsk   = majorTrend.ratesThisTF[1].high + spread + clearance;
-      double stopAsk    = spread + majorTrend.ratesThisTF[1].low - clearance;
+      minorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
+      double entryAsk   = minorTrend.ratesThisTF[1].high + spread + clearance;
+      double stopAsk    = spread + minorTrend.ratesThisTF[1].low - clearance;
       if(entryAsk<instrumentPointers[_ins].Bid())
         {
          Print(__FUNCTION__," entry price less than bid price");
@@ -195,7 +195,7 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
          if(targetAsk != 0.0)
            {
             // 3 candles because _Period in seconds ?
-            datetime eTime = expireTime(candlesToExpire,_ins,TimeTradeServer());// = TimeTradeServer() + (candlesToExpire* (PeriodSeconds(majorTrend.waveHTFPeriod)/PeriodSeconds(_Period)) * _Period * 60);
+            datetime eTime = expireTime(candlesToExpire,_ins,TimeTradeServer());// = TimeTradeServer() + (candlesToExpire* (PeriodSeconds(minorTrend.waveHTFPeriod)/PeriodSeconds(_Period)) * _Period * 60);
             if(openBuyStopOrder(_ins,entryAsk,lots,stopAsk,targetAsk,eTime,catType))
                condition = true;
             else
@@ -216,10 +216,10 @@ bool StopLimitFlow::openBuySellStopOrder(simState _simThis,int _ins)
    else
       if(_simThis == simShort)
         {
-         majorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
+         minorTrend = this.instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
          double clearance = deltaFireRoom * instrumentPointers[_ins].Point();
-         double entryBid = majorTrend.ratesThisTF[1].low - clearance;
-         double stopBid = majorTrend.ratesThisTF[1].high + clearance;
+         double entryBid = minorTrend.ratesThisTF[1].low - clearance;
+         double stopBid = minorTrend.ratesThisTF[1].high + clearance;
          if(entryBid>instrumentPointers[_ins].Bid())
            {
             Print(__FUNCTION__," entry price less than bid price");

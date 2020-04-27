@@ -30,9 +30,6 @@ public:
    // Initialise all selected Trend instrument period
    bool                 SetUpFlow::startStrategyComponents(int _ins, int _iTF);
    void                 SetUpFlow::outTipStates(int _ins, string _action, int _shift, int _count);
-
-   bool                 SetUpFlow::processInitBar(int _ins, int _TF)
-   ;
    bool                 SetUpFlow::process(simState _catThis, int _ins);
    // run the new bar on all instruments runtime-Get the new trend and all cyclically set strategy values for a new chart Bar
    void                 SetUpFlow::runNewBarInstruments(int _ins);
