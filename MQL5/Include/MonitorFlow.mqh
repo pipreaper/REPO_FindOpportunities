@@ -33,7 +33,8 @@ public:
    void              MonitorFlow::getHigherLevel(int _ins, int _start);
    rttl              MonitorFlow:: monitorRoomLeft(int _ins, int _count, int _start);
    bool              MonitorFlow::isNear(rttl _rttlThis);
-//   void              MonitorFlow::cciSetState(int _ins);
+   void              MonitorFlow::cciSetState(int _ins, int _index);
+   cciClicked        MonitorFlow::cciGetState(int _ins, int _index);
   };
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -244,6 +245,26 @@ rttl       MonitorFlow:: monitorRoomLeft(int _ins, int _count, int _start)
 //      //   Print("HIGH -> Room to left, belongs to: ", EnumToString(currLipe[0].waveHTFPeriod)," Level Price:  ",currLipe[0].levelPrice," highest: ",ratesChartBars[1].high, " date: ", ratesChartBars[1].time);
 //     }
    return rttlNone;
+  }
+// +------------------------------------------------------------------+
+// | set CCI Click State by calling get which sets first              |
+// +------------------------------------------------------------------+
+void  MonitorFlow::cciSetState(int _ins, int _index)
+  {
+   cciClicked cciNow = cciNone;
+   Tip *tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_index);
+   if(CheckPointer(tip)!=POINTER_INVALID)
+      tip.cciWaveInfo.setCCIState();
+  }
+// +------------------------------------------------------------------+
+// | get CCI state                                                    |
+// +------------------------------------------------------------------+
+cciClicked  MonitorFlow::cciGetState(int _ins, int _index)
+  {
+   Tip *tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_index);
+   if(CheckPointer(tip)!=POINTER_INVALID)
+      return tip.cciWaveInfo.getCCIState();
+   return cciNone;
   }
 //// |------------------------------------------------------------------+
 //// | checkSellTrendWave                                               |

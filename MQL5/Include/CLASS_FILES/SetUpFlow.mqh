@@ -18,10 +18,10 @@ private:
 public:
    dataLoadState        dls;
    void                 SetUpFlow::SetUpFlow();
-   setUpState           SetUpFlow::checkEntryTrigger(int _ins,int _shift);
+   setUpState           SetUpFlow::checkEntryTriggerMajorMinor(int _ins,int _shift);
    void                 SetUpFlow::checkMoveDiagLine(int _ins,int _shift);
    setUpState           SetUpFlow::getSetUpState();
-   void                 SetUpFlow::haveSetup(int _ins);
+   void                 SetUpFlow::haveSetupMajorMinor(int _ins);
    //bool                 SetUpFlow::isThird();
    //bool                 SetUpFlow::isInRange();
    // check extreme candle
@@ -30,11 +30,11 @@ public:
    // Initialise all selected Trend instrument period
    bool                 SetUpFlow::startStrategyComponents(int _ins, int _iTF);
    void                 SetUpFlow::outTipStates(int _ins, string _action, int _shift, int _count);
-   bool                 SetUpFlow::process(simState _catThis, int _ins);
+ //  bool                 SetUpFlow::process(simState _catThis, int _ins);
    // run the new bar on all instruments runtime-Get the new trend and all cyclically set strategy values for a new chart Bar
    void                 SetUpFlow::runNewBarInstruments(int _ins);
    // set stop target by atr
-   void                 SetUpFlow::setStopTargetsByATR(int _ins, double _marketBidPrice,ENUM_ORDER_TYPE _bs);
+  // void                 SetUpFlow::setStopTargetsByATR(int _ins, double _marketBidPrice,ENUM_ORDER_TYPE _bs);
    void                 SetUpFlow::setSetUpState(setUpState _suState);
    void SetUpFlow::     ~SetUpFlow();
   };
@@ -102,7 +102,7 @@ void  SetUpFlow::checkMoveDiagLine(int _ins,int _shift)
 // +------------------------------------------------------------------+
 // |haveSetup                                                         |
 // +------------------------------------------------------------------+
-void  SetUpFlow::haveSetup(int _ins)
+void  SetUpFlow::haveSetupMajorMinor(int _ins)
   {
    DiagTip *minorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
    DiagTip *majorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
@@ -148,6 +148,7 @@ void  SetUpFlow::runNewBarInstruments(int _ins)
             tip.atrWaveInfo.setWaveHeightPointsATR(tip.onScreenWaveHeight,1);
          else
             tip.atrWaveInfo.setWaveHeightPointsFixed(tip.onScreenWaveHeight);
+            tip.cciWaveInfo.setCCIValues(1);
          // NOW ALWAYS DO CHART BAR TF STUFF
          // TipElement *tipe =  this.GetLastNode();
          // need rates for calculating flexible ATR maybe -> calcATR set to dynamic
@@ -211,7 +212,7 @@ setUpState        SetUpFlow::getSetUpState()
 // |checkEntryTrigger                                                 |
 // |curently only criteria is check minor trend                       |
 // +------------------------------------------------------------------|
-setUpState              SetUpFlow::checkEntryTrigger(int _ins, int _shift)
+setUpState              SetUpFlow::checkEntryTriggerMajorMinor(int _ins, int _shift)
   {
    DiagTip *minorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
    DiagTip *majorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
@@ -277,140 +278,140 @@ void SetUpFlow::~SetUpFlow() {}
 //|initSim                                                           |
 //+------------------------------------------------------------------+
 void SetUpFlow::initSetUpFlow() {}
-//+------------------------------------------------------------------+
-//| processBigShadow                                                 |
-//+------------------------------------------------------------------+
-bool SetUpFlow::process(simState _simThis,int _ins)
-  {
-   bool condition = false;
-   if(_simThis == simLong)
-     {
-      double spread = instrumentPointers[_ins].Spread()*instrumentPointers[_ins].Point();
-      double marketAsk = instrumentPointers[_ins].Bid() + spread;
-
-      // get atr stop target values
-      ArrayResize(stopTargetsArray,0);
-      setStopTargetsByATR(_ins,marketAsk,ORDER_TYPE_BUY);
-      if(ArraySize(stopTargetsArray) < 4)
-         return condition;
-      // check lots to open big belt long
-      double lots = CheckOpenLong(_ins, marketAsk, stopTargetsArray[0]);
-      // open big belt long
-      if(lots > 0)
-        {
-         if(stopTargetsArray[targetZone] != 0.0)
-           {
-            if(openBuyPosition(_ins,instrumentPointers[_ins].Bid(),lots,stopTargetsArray[0],stopTargetsArray[targetZone],catType))
-               condition = true;
-            else
-               condition = false;
-           }
-         else
-           {
-            Print(__FUNCTION__, " targetAsk from selectTarget returned zero: ");
-            return false;
-           }
-        }
-      else
-        {
-         Print(__FUNCTION__, " lots <= zero: ", instrumentPointers[_ins].Name(), " marketAsk: ", marketAsk, " stopTargetsArray[0]: ",stopTargetsArray[0]);
-         return condition;
-        }
-     }
-   else
-      if(_simThis == simShort)
-        {
-         double marketBid = instrumentPointers[_ins].Bid();
-         // get atr stop target values
-         ArrayResize(stopTargetsArray,0);
-         setStopTargetsByATR(_ins,marketBid,ORDER_TYPE_SELL);
-         if(ArraySize(stopTargetsArray) < 4)
-            return condition;
-         // check lots to open cci long
-         double lots = CheckOpenShort(_ins,marketBid,stopTargetsArray[0]);
-         // open big belt long
-         if(lots > 0)
-           {
-            if(stopTargetsArray[targetZone] != 0.0)
-              {
-               if(openSellPosition(_ins,marketBid,lots,stopTargetsArray[0],stopTargetsArray[targetZone],catType))
-                  condition = true;
-               else
-                  condition = false;
-              }
-            else
-              {
-               Print(__FUNCTION__, " targetBid from selectTarget returned zero: ");
-               return false;
-              }
-           }
-         else
-            Print(__FUNCTION__, " lots <= zero: ", instrumentPointers[_ins].Name());
-        }
-   return condition;
-  }
+////+------------------------------------------------------------------+
+////| processBigShadow                                                 |
+////+------------------------------------------------------------------+
+//bool SetUpFlow::process(simState _simThis,int _ins)
+//  {
+//   bool condition = false;
+//   if(_simThis == simLong)
+//     {
+//      double spread = instrumentPointers[_ins].Spread()*instrumentPointers[_ins].Point();
+//      double marketAsk = instrumentPointers[_ins].Bid() + spread;
+//
+//      // get atr stop target values
+//      ArrayResize(stopTargetsArray,0);
+//      setStopTargetsByATR(_ins,marketAsk,ORDER_TYPE_BUY);
+//      if(ArraySize(stopTargetsArray) < 4)
+//         return condition;
+//      // check lots to open big belt long
+//      double lots = CheckOpenLong(_ins, marketAsk, stopTargetsArray[0]);
+//      // open big belt long
+//      if(lots > 0)
+//        {
+//         if(stopTargetsArray[targetZone] != 0.0)
+//           {
+//            if(openBuyPosition(_ins,instrumentPointers[_ins].Bid(),lots,stopTargetsArray[0],stopTargetsArray[targetZone],catType))
+//               condition = true;
+//            else
+//               condition = false;
+//           }
+//         else
+//           {
+//            Print(__FUNCTION__, " targetAsk from selectTarget returned zero: ");
+//            return false;
+//           }
+//        }
+//      else
+//        {
+//         Print(__FUNCTION__, " lots <= zero: ", instrumentPointers[_ins].Name(), " marketAsk: ", marketAsk, " stopTargetsArray[0]: ",stopTargetsArray[0]);
+//         return condition;
+//        }
+//     }
+//   else
+//      if(_simThis == simShort)
+//        {
+//         double marketBid = instrumentPointers[_ins].Bid();
+//         // get atr stop target values
+//         ArrayResize(stopTargetsArray,0);
+//         setStopTargetsByATR(_ins,marketBid,ORDER_TYPE_SELL);
+//         if(ArraySize(stopTargetsArray) < 4)
+//            return condition;
+//         // check lots to open cci long
+//         double lots = CheckOpenShort(_ins,marketBid,stopTargetsArray[0]);
+//         // open big belt long
+//         if(lots > 0)
+//           {
+//            if(stopTargetsArray[targetZone] != 0.0)
+//              {
+//               if(openSellPosition(_ins,marketBid,lots,stopTargetsArray[0],stopTargetsArray[targetZone],catType))
+//                  condition = true;
+//               else
+//                  condition = false;
+//              }
+//            else
+//              {
+//               Print(__FUNCTION__, " targetBid from selectTarget returned zero: ");
+//               return false;
+//              }
+//           }
+//         else
+//            Print(__FUNCTION__, " lots <= zero: ", instrumentPointers[_ins].Name());
+//        }
+//   return condition;
+//  }
 //+------------------------------------------------------------------+
 //|cciSetStopTargetsByATR                                            |
 //| ** associated with TREND **                                      |
 //|currently uses wiggle atr to set stops and targets                |
 //+------------------------------------------------------------------+
-void SetUpFlow::setStopTargetsByATR(int _ins, double _marketBidOrAsk,ENUM_ORDER_TYPE _bs)
-  {
-//  set to chart index if zero index = first trend index
-   ENUM_TIMEFRAMES atrPeriod = tfDataTrend.useTF[tfDataTrend.trendIndex[0]];
-   ATRInfo *atr = NULL;
-   int tot = instrumentPointers[_ins].pContainerTip.Total();
-   if(instrumentPointers[_ins].pContainerTip.Total()>0)
-     {
-      // ** CHECK FOR NEW TREND DATA FOR EACH ACTIVE PERIOD
-      for(int instrumentTrend=0; (instrumentTrend<instrumentPointers[_ins].pContainerTip.Total()); instrumentTrend++)
-        {
-
-         if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend))!=POINTER_INVALID)
-           {
-            Tip *tip = instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend);
-            if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend))!=POINTER_INVALID)
-              {
-               atr = tip.atrWaveInfo;
-               if(atr.waveHTFPeriod == atrPeriod)
-                 {
-                  int numValues = CopyBuffer(atr.atrHandle, 0,1,1, atr.atrWrapper.atrValue);
-                  if(numValues < 0)
-                    {
-                     Print(__FUNCTION__, "failed to get indicator value: ",_ins," _Period ",atrPeriod);
-                     return;
-                    }
-                  else
-                    {
-                     // set target
-                     if(_bs == ORDER_TYPE_BUY)
-                       {
-                        ArrayResize(stopTargetsArray,4);
-                        stopTargetsArray[0]= _marketBidOrAsk - sl*atr.atrWrapper.atrValue[0];
-                        stopTargetsArray[1]= _marketBidOrAsk + tp*atr.atrWrapper.atrValue[0];
-                        stopTargetsArray[2]= _marketBidOrAsk + 2*tp*atr.atrWrapper.atrValue[0];
-                        stopTargetsArray[3]= _marketBidOrAsk + 3*tp*atr.atrWrapper.atrValue[0];
-                        return;
-                       }
-                     else
-                        if(_bs == ORDER_TYPE_SELL)
-                          {
-                           ArrayResize(stopTargetsArray,4);
-                           stopTargetsArray[0]= _marketBidOrAsk + sl*atr.atrWrapper.atrValue[0];
-                           stopTargetsArray[1]= _marketBidOrAsk - tp*atr.atrWrapper.atrValue[0];
-                           stopTargetsArray[2]= _marketBidOrAsk - 2*tp*atr.atrWrapper.atrValue[0];
-                           stopTargetsArray[3]= _marketBidOrAsk - 3*tp*atr.atrWrapper.atrValue[0];
-                           return;
-                          }
-                    }
-                 }
-              }
-            else
-               Print(__FUNCTION__, "Failed to get atr null Pointer");
-           }
-        }
-     }
-  }
+//void SetUpFlow::setStopTargetsByATR(int _ins, double _marketBidOrAsk,ENUM_ORDER_TYPE _bs)
+//  {
+////  set to chart index if zero index = first trend index
+//   ENUM_TIMEFRAMES atrPeriod = tfDataTrend.useTF[tfDataTrend.trendIndex[0]];
+//   ATRInfo *atr = NULL;
+//   int tot = instrumentPointers[_ins].pContainerTip.Total();
+//   if(instrumentPointers[_ins].pContainerTip.Total()>0)
+//     {
+//      // ** CHECK FOR NEW TREND DATA FOR EACH ACTIVE PERIOD
+//      for(int instrumentTrend=0; (instrumentTrend<instrumentPointers[_ins].pContainerTip.Total()); instrumentTrend++)
+//        {
+//
+//         if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend))!=POINTER_INVALID)
+//           {
+//            Tip *tip = instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend);
+//            if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend))!=POINTER_INVALID)
+//              {
+//               atr = tip.atrWaveInfo;
+//               if(atr.waveHTFPeriod == atrPeriod)
+//                 {
+//                  int numValues = CopyBuffer(atr.atrHandle, 0,1,1, atr.atrWrapper.atrValue);
+//                  if(numValues < 0)
+//                    {
+//                     Print(__FUNCTION__, "failed to get indicator value: ",_ins," _Period ",atrPeriod);
+//                     return;
+//                    }
+//                  else
+//                    {
+//                     // set target
+//                     if(_bs == ORDER_TYPE_BUY)
+//                       {
+//                        ArrayResize(stopTargetsArray,4);
+//                        stopTargetsArray[0]= _marketBidOrAsk - sl*atr.atrWrapper.atrValue[0];
+//                        stopTargetsArray[1]= _marketBidOrAsk + tp*atr.atrWrapper.atrValue[0];
+//                        stopTargetsArray[2]= _marketBidOrAsk + 2*tp*atr.atrWrapper.atrValue[0];
+//                        stopTargetsArray[3]= _marketBidOrAsk + 3*tp*atr.atrWrapper.atrValue[0];
+//                        return;
+//                       }
+//                     else
+//                        if(_bs == ORDER_TYPE_SELL)
+//                          {
+//                           ArrayResize(stopTargetsArray,4);
+//                           stopTargetsArray[0]= _marketBidOrAsk + sl*atr.atrWrapper.atrValue[0];
+//                           stopTargetsArray[1]= _marketBidOrAsk - tp*atr.atrWrapper.atrValue[0];
+//                           stopTargetsArray[2]= _marketBidOrAsk - 2*tp*atr.atrWrapper.atrValue[0];
+//                           stopTargetsArray[3]= _marketBidOrAsk - 3*tp*atr.atrWrapper.atrValue[0];
+//                           return;
+//                          }
+//                    }
+//                 }
+//              }
+//            else
+//               Print(__FUNCTION__, "Failed to get atr null Pointer");
+//           }
+//        }
+//     }
+//  }
 ////+------------------------------------------------------------------+
 ////| pull the indicatorValues until have the start time               |
 ////+------------------------------------------------------------------+
@@ -467,8 +468,8 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
          // new bar info
          condition = rTip.processTrendBarInit(shift);
          checkMoveDiagLine(_ins,shift);
-         haveSetup(_ins);
-         checkEntryTrigger(_ins, shift);
+         haveSetupMajorMinor(_ins);
+         checkEntryTriggerMajorMinor(_ins, shift);
         }
      }
 // if this tip has not initialised then whole process fails

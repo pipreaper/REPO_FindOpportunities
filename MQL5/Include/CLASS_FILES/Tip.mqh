@@ -79,7 +79,7 @@ public:
    int               maxBarsDegugRun;
    ATRWaveInfo       *atrWaveInfo;
    CCIWaveInfo       *cciWaveInfo;
-   EMAInfo           *emaInfo;
+   // EMAInfo           *emaInfo;
    waveCalcSizeType  wCalcSizeType;
    int               atrRange;
    int               maPeriod;
@@ -235,8 +235,8 @@ bool              Tip::initTip(string _symbol,int _numDefineWave,int _chartPerio
 //+------------------------------------------------------------------+
 void Tip::setParent(ContainerTip &_p)
   {
-  // parent = p;
-   parent = GetPointer(_p); 
+// parent = p;
+   parent = GetPointer(_p);
   }
 // +------------------------------------------------------------------+
 // |Destructor: Destroy Tip                                           |
@@ -247,8 +247,8 @@ void Tip::~Tip()
       delete(atrWaveInfo);
    if(CheckPointer(cciWaveInfo)!=POINTER_INVALID)
       delete(cciWaveInfo);
-   if(CheckPointer(emaInfo)!=POINTER_INVALID)
-      delete(emaInfo);
+// if(CheckPointer(emaInfo)!=POINTER_INVALID)
+//    delete(emaInfo);
   }
 // +------------------------------------------------------------------+
 // |initIndicators                                                    |
@@ -258,9 +258,9 @@ bool Tip::addIndicators(void)
 //initialise new clases of indicators -> each Tip has a copy
    atrWaveInfo  = new ATRWaveInfo(symbol,waveHTFPeriod,atrRange,TRD);
    atrWaveInfo.atrInit(scaleATR,this.showPanel);
-//  cciWaveInfo  = new CCIWaveInfo(symbol,waveHTFPeriod,cciPeriod,cciAppliedPrice,"TRD");
-//  cciWaveInfo.CCISetWaveInfo(cciTriggerLevel, cciExitLevel);
-   emaInfo= new EMAInfo(symbol,waveHTFPeriod,emaTrendPeriod,emaTrendShift,emaTrendMethod,emaTrendAppliedPrice,"TRD");
+   cciWaveInfo  = new CCIWaveInfo(symbol,waveHTFPeriod,cciPeriod,cciAppliedPrice,"TRD");
+   cciWaveInfo.cciInit(cciTriggerLevel, cciExitLevel);
+//  emaInfo= new EMAInfo(symbol,waveHTFPeriod,emaTrendPeriod,emaTrendShift,emaTrendMethod,emaTrendAppliedPrice,"TRD");
    return true;
   }
 // +------------------------------------------------------------------+

@@ -23,7 +23,8 @@ public:
    double            pointSize;
    int               digits;
    void              CCIWaveInfo::CCIWaveInfo(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, int _cciRange, int _cciAppliedPrice, string _cciCatalystID);
-   void              CCIWaveInfo::CCISetWaveInfo(double _cciTriggerLevel, double _cciExitLevel);
+   void              CCIWaveInfo::cciInit(double _cciTriggerLevel, double _cciExitLevel);
+   bool              CCIWaveInfo::setCCIValues(int _shift);
    void              CCIWaveInfo::setCCIState(void);
    cciClicked        CCIWaveInfo::getCCIState(void);
   };
@@ -34,9 +35,23 @@ void CCIWaveInfo::CCIWaveInfo(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, i
   {
   }
 //+------------------------------------------------------------------+
+//| set onscreen text and wave height for this bar variable by ATR   |
+//| for this bar                                                     |
+//+------------------------------------------------------------------+
+bool              CCIWaveInfo::setCCIValues(int _shift)
+  {
+   bool condition = true;
+   if(CopyBuffer(cciHandle,0,_shift,1, cciWrapper.cciValue) <= 0 || cciWrapper.cciValue[0]<=0)
+     {
+      condition = false;
+      Print(__FUNCTION__," shift: ",_shift," cciWrapper.cciValue[0] ",cciWrapper.cciValue[0]);
+     }
+   return condition;
+  }
+//+------------------------------------------------------------------+
 //| CCISetWaveInfo                                                   |
 //+------------------------------------------------------------------+
-void              CCIWaveInfo::CCISetWaveInfo(double _cciTriggerLevel, double _cciExitLevel)
+void              CCIWaveInfo::cciInit(double _cciTriggerLevel, double _cciExitLevel)
   {
    cciTriggerLevel=_cciTriggerLevel;
    cciExitLevel=_cciExitLevel;
