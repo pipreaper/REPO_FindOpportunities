@@ -18,30 +18,27 @@ private:
 public:
    dataLoadState        dls;
    void                 SetUpFlow::SetUpFlow();
-   setUpState           SetUpFlow::checkEntryTriggerMajorMinor(int _ins,int _shift);
-   void                 SetUpFlow::checkMoveDiagLine(int _ins,int _shift);
+   setUpState           SetUpFlow::checkEntryTrigger(int _ins,int _shift);
+   void                 SetUpFlow::checkMoveDiagLine(int _ins);
    setUpState           SetUpFlow::getSetUpState();
-   void                 SetUpFlow::haveSetupMajorMinor(int _ins);
+   void                 SetUpFlow::haveTrendSetup(int _ins);
+   //void                 SetUpFlow::haveCCISetup(int _ins);
    //bool                 SetUpFlow::isThird();
    //bool                 SetUpFlow::isInRange();
    // check extreme candle
    bool                 SetUpFlow::isExtremum(ENUM_POSITION_TYPE _posType);
    void                 SetUpFlow::initSetUpFlow();
-   // Initialise all selected Trend instrument period
    bool                 SetUpFlow::startStrategyComponents(int _ins, int _iTF);
    void                 SetUpFlow::outTipStates(int _ins, string _action, int _shift, int _count);
- //  bool                 SetUpFlow::process(simState _catThis, int _ins);
-   // run the new bar on all instruments runtime-Get the new trend and all cyclically set strategy values for a new chart Bar
    void                 SetUpFlow::runNewBarInstruments(int _ins);
-   // set stop target by atr
-  // void                 SetUpFlow::setStopTargetsByATR(int _ins, double _marketBidPrice,ENUM_ORDER_TYPE _bs);
+   //void                 SetUpFlow::setStopTargetsByATR(int _ins, double _marketBidPrice,ENUM_ORDER_TYPE _bs);
    void                 SetUpFlow::setSetUpState(setUpState _suState);
    void SetUpFlow::     ~SetUpFlow();
   };
 // +------------------------------------------------------------------+
 // |drawDiagLines                                                     |
 // +------------------------------------------------------------------+
-void  SetUpFlow::checkMoveDiagLine(int _ins,int _shift)
+void  SetUpFlow::checkMoveDiagLine(int _ins)
   {
    DiagTip *diagTip=NULL;
    for(int instrumentTrend=0; (instrumentTrend<instrumentPointers[_ins].pContainerTip.Total()); instrumentTrend++)
@@ -102,35 +99,65 @@ void  SetUpFlow::checkMoveDiagLine(int _ins,int _shift)
 // +------------------------------------------------------------------+
 // |haveSetup                                                         |
 // +------------------------------------------------------------------+
-void  SetUpFlow::haveSetupMajorMinor(int _ins)
+void  SetUpFlow::haveTrendSetup(int _ins)
   {
    DiagTip *minorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
    DiagTip *majorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
-   if((majorTrend.getTipState() == up) && (minorTrend.getTipState() == down))
-     {
-      //    Print(__FUNCTION__," before setUpState: ",EnumToString(getSetUpState()));
+   if((majorTrend.cciWaveInfo.getCCIState() == cciAbove100) && (minorTrend.cciWaveInfo.getCCIState() == cciBelow100))//&& (minorTrend.getTipState() == down)majorTrend.getTipState() == up)  && (
       setSetUpState(waiting_trigger_break_resistance);
-      //  Print(__FUNCTION__," UP/DOWN minor: ",EnumToString(minorTrend.getTipState()), " ",minorTrend.waveHTFPeriod," major: ",EnumToString(majorTrend.getTipState()), " ",majorTrend.waveHTFPeriod);
-      //   Print(__FUNCTION__," after setUpState: ",EnumToString(getSetUpState()));
-      //    Print(" ");
-     }
    else
-      if((majorTrend.getTipState() == down) && (minorTrend.getTipState() == up))
-        {
+      if((majorTrend.cciWaveInfo.getCCIState() == cciBelow100) && (minorTrend.cciWaveInfo.getCCIState() == cciAbove100))//&& (minorTrend.getTipState() == up)majorTrend.getTipState() == down)  && (
          setSetUpState(waiting_trigger_break_support);
-        }
       else
-         if((majorTrend.getTipState() == up) && (minorTrend.getTipState() == up))
-           {
+         if((majorTrend.cciWaveInfo.getCCIState() == cciAbove100) && (minorTrend.cciWaveInfo.getCCIState() == cciAbove100))//majorTrend.getTipState() == up) && (
             setSetUpState(trending);
-            //    Print(__FUNCTION__," UP/UP minor: ",EnumToString(minorTrend.getTipState()), " ",minorTrend.waveHTFPeriod," major: ",EnumToString(majorTrend.getTipState()), " ",majorTrend.waveHTFPeriod);
-            //  Print(" ");
-           }
          else
-            if((majorTrend.getTipState() == down) && (minorTrend.getTipState() == down))
+            if((majorTrend.cciWaveInfo.getCCIState() == cciBelow100) && (minorTrend.cciWaveInfo.getCCIState() == cciBelow100))//(majorTrend.getTipState() == down) && (
                setSetUpState(trending);
             else
                setSetUpState(init_diag_line);
+  }
+// +------------------------------------------------------------------+
+// |checkEntryTrigger                                                 |
+// |curently only criteria is check minor trend                       |
+// +------------------------------------------------------------------|
+setUpState              SetUpFlow::checkEntryTrigger(int _ins, int _shift)
+  {
+   DiagTip *minorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
+   DiagTip *majorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
+   if((this.getSetUpState() != waiting_trigger_break_resistance) && this.getSetUpState() != waiting_trigger_break_support)
+      return getSetUpState();
+   if(this.getSetUpState() == waiting_trigger_break_resistance)
+     {
+      // update the diagonal lines values
+      minorTrend.updateTrendPriceTime(minorTrend.parent.ratesCTF[_shift].time);
+      //  int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
+      majorTrend.updateTrendPriceTime(majorTrend.parent.ratesCTF[_shift].time);
+
+      if(majorTrend.cciWaveInfo.cciWrapper.cciValue[0] > majorTrend.cciTriggerLevel)
+         this.setSetUpState(open_long);
+      // and check support line has been breached
+      //if(//(minorTrend.parent.ratesCTF[1].low > minorTrend.YVals[1])&&
+      //(minorTrend.parent.ratesCTF[1].open > majorTrend.YVals[1]))
+      //     (minorTrend.parent.ratesCTF[1].low > MathMin(majorTrend.ratesHTF[1].low,majorTrend.ratesHTF[2].low))
+      // )
+     }
+   else
+      if(this.getSetUpState() == waiting_trigger_break_support)
+        {
+         // update the diagonal lines values
+         minorTrend.updateTrendPriceTime(minorTrend.parent.ratesCTF[_shift].time);
+         //int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
+         majorTrend.updateTrendPriceTime(majorTrend.parent.ratesCTF[_shift].time);
+         // and check support line has been breached
+         // if(//(minorTrend.parent.ratesCTF[1].high < minorTrend.YVals[1])&&
+         // (minorTrend.parent.ratesCTF[1].open < majorTrend.YVals[1])
+         //      (minorTrend.parent.ratesCTF[1].high < MathMax(majorTrend.ratesHTF[1].high,majorTrend.ratesHTF[2].high))
+         // )
+         if(majorTrend.cciWaveInfo.cciWrapper.cciValue[0] < -majorTrend.cciTriggerLevel)
+            this.setSetUpState(open_short);
+        }
+   return this.getSetUpState();
   }
 // +------------------------------------------------------------------+
 // |runNewBarAllInstruments                                           |
@@ -138,29 +165,22 @@ void  SetUpFlow::haveSetupMajorMinor(int _ins)
 void  SetUpFlow::runNewBarInstruments(int _ins)
   {
    Tip *tip=NULL;
-   for(int instrumentTrend=0; (instrumentTrend<instrumentPointers[_ins].pContainerTip.Total()); instrumentTrend++)
+   CopyRates(instrumentPointers[_ins].symbol,_Period,0,101,instrumentPointers[_ins].pContainerTip.ratesCTF);
+   ArraySetAsSeries(instrumentPointers[_ins].pContainerTip.ratesCTF,true);
+   for(int index=0; (index<instrumentPointers[_ins].pContainerTip.Total()); index++)
      {
-      if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend))!= POINTER_INVALID)
+      if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index))!= POINTER_INVALID)
         {
-         tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend);
-         // Always update Chart TF bars
+         tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index);
+         tip.processHTFTrendBar();
          if(wCalcSizeType == waveCalcATR)
             tip.atrWaveInfo.setWaveHeightPointsATR(tip.onScreenWaveHeight,1);
          else
             tip.atrWaveInfo.setWaveHeightPointsFixed(tip.onScreenWaveHeight);
-            tip.cciWaveInfo.setCCIValues(1);
-         // NOW ALWAYS DO CHART BAR TF STUFF
-         // TipElement *tipe =  this.GetLastNode();
-         // need rates for calculating flexible ATR maybe -> calcATR set to dynamic
-         CopyRates(tip.symbol,_Period,0,101,tip.parent.ratesCTF);
-         ArraySetAsSeries(tip.parent.ratesCTF,true);
-         //    if(isNewHTF(tip,0))
-         //      {
-         // Have a new bar so old trend suState may change - Calculate trend for this waveHTFperiod
-         //    {
-         //  Print(__FUNCTION__" -> tip.processTrendBar: ",EnumToString(tip.waveHTFPeriod));
-         tip.processHTFTrendBar();
-         //  }
+         tip.cciWaveInfo.setCCIValues(1);
+         //   if(tip.cciWaveInfo.waveHTFPeriod == PERIOD_M30 && (tip.cciWaveInfo.cciWrapper.cciValue[0] > 100 || tip.cciWaveInfo.cciWrapper.cciValue[0] < -100))
+         //    DebugBreak();
+         tip.cciWaveInfo.setCCIState();
         }
      }
    Lip *level=NULL;
@@ -207,43 +227,6 @@ void              SetUpFlow::setSetUpState(setUpState _suState)
 setUpState        SetUpFlow::getSetUpState()
   {
    return suState;
-  }
-// +------------------------------------------------------------------+
-// |checkEntryTrigger                                                 |
-// |curently only criteria is check minor trend                       |
-// +------------------------------------------------------------------|
-setUpState              SetUpFlow::checkEntryTriggerMajorMinor(int _ins, int _shift)
-  {
-   DiagTip *minorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
-   DiagTip *majorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
-   if((this.getSetUpState() != waiting_trigger_break_resistance) && this.getSetUpState() != waiting_trigger_break_support)
-      return getSetUpState();
-   if(this.getSetUpState() == waiting_trigger_break_resistance)
-     {
-      // update the diagonal lines values
-      minorTrend.updateTrendPriceTime(minorTrend.parent.ratesCTF[_shift].time);
-      //  int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
-      majorTrend.updateTrendPriceTime(majorTrend.parent.ratesCTF[_shift].time);
-      // and check support line has been breached
-      if((minorTrend.parent.ratesCTF[1].low > minorTrend.YVals[1])&&
-         (minorTrend.parent.ratesCTF[1].open > majorTrend.YVals[1]))
-         //     (minorTrend.parent.ratesCTF[1].low > MathMin(majorTrend.ratesHTF[1].low,majorTrend.ratesHTF[2].low)))
-         this.setSetUpState(open_long);
-     }
-   else
-      if(this.getSetUpState() == waiting_trigger_break_support)
-        {
-         // update the diagonal lines values
-         minorTrend.updateTrendPriceTime(minorTrend.parent.ratesCTF[_shift].time);
-         //int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
-         majorTrend.updateTrendPriceTime(majorTrend.parent.ratesCTF[_shift].time);
-         // and check support line has been breached
-         if((minorTrend.parent.ratesCTF[1].high < minorTrend.YVals[1])&&
-            (minorTrend.parent.ratesCTF[1].open < majorTrend.YVals[1]))
-            //      (minorTrend.parent.ratesCTF[1].high < MathMax(majorTrend.ratesHTF[1].high,majorTrend.ratesHTF[2].high)))
-            this.setSetUpState(open_short);
-        }
-   return this.getSetUpState();
   }
 // +------------------------------------------------------------------+
 // |outTipStates                                                      |
@@ -467,9 +450,9 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
             rTip.atrWaveInfo.setWaveHeightPointsFixed(rTip.onScreenWaveHeight);
          // new bar info
          condition = rTip.processTrendBarInit(shift);
-         checkMoveDiagLine(_ins,shift);
-         haveSetupMajorMinor(_ins);
-         checkEntryTriggerMajorMinor(_ins, shift);
+         checkMoveDiagLine(_ins);
+         haveTrendSetup(_ins);
+         checkEntryTrigger(_ins, shift);
         }
      }
 // if this tip has not initialised then whole process fails

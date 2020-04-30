@@ -27,6 +27,7 @@ public:
    bool              CCIWaveInfo::setCCIValues(int _shift);
    void              CCIWaveInfo::setCCIState(void);
    cciClicked        CCIWaveInfo::getCCIState(void);
+   double            CCIWaveInfo::getCCIValue(void);
   };
 //+------------------------------------------------------------------+
 //| CCIWaveInfo                                                      |
@@ -41,7 +42,7 @@ void CCIWaveInfo::CCIWaveInfo(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, i
 bool              CCIWaveInfo::setCCIValues(int _shift)
   {
    bool condition = true;
-   if(CopyBuffer(cciHandle,0,_shift,1, cciWrapper.cciValue) <= 0 || cciWrapper.cciValue[0]<=0)
+   if(CopyBuffer(cciHandle,0,_shift,1, cciWrapper.cciValue) <= 0)
      {
       condition = false;
       Print(__FUNCTION__," shift: ",_shift," cciWrapper.cciValue[0] ",cciWrapper.cciValue[0]);
@@ -63,10 +64,12 @@ void              CCIWaveInfo::cciInit(double _cciTriggerLevel, double _cciExitL
    digits = int(SymbolInfoInteger(symbol,SYMBOL_DIGITS));
   }
 //+------------------------------------------------------------------+
-//| setWaveHeightPoints                                              |
+//|                                               |
 //+------------------------------------------------------------------+
 void              CCIWaveInfo::setCCIState()
   {
+//if(cciWrapper.cciValue[0]==-1 || cciWrapper.cciValue[0]==0)
+//   DebugBreak();
    if(cciWrapper.cciValue[0] > cciTriggerLevel)
       cciState=cciAbove100;
    else
@@ -78,6 +81,13 @@ void              CCIWaveInfo::setCCIState()
          else
             if((cciState == cciBelow100) && (cciWrapper.cciValue[0] > -cciExitLevel))
                cciState = cciNone;
+  }
+//+------------------------------------------------------------------+
+//| setWaveHeightPoints                                              |
+//+------------------------------------------------------------------+
+double              CCIWaveInfo::getCCIValue()
+  {
+   return this.cciWrapper.cciValue[0];
   }
 //+------------------------------------------------------------------+
 //| setWaveHeightPoints                                              |

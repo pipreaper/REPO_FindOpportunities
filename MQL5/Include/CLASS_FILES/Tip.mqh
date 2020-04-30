@@ -402,7 +402,7 @@ void Tip::debugStates(int _ins, string _action,int _shift,int _count)
 void              Tip::processHTFTrendBar()
   {
    CopyRates(symbol,waveHTFPeriod,0,101,ratesThisTF);
-   ArraySetAsSeries(ratesThisTF,true);
+   ArraySetAsSeries(ratesThisTF,true);  
    interrogateWaveArm(1);
    analyseTipState(1);
   }

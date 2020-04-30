@@ -246,26 +246,26 @@ rttl       MonitorFlow:: monitorRoomLeft(int _ins, int _count, int _start)
 //     }
    return rttlNone;
   }
-// +------------------------------------------------------------------+
-// | set CCI Click State by calling get which sets first              |
-// +------------------------------------------------------------------+
-void  MonitorFlow::cciSetState(int _ins, int _index)
-  {
-   cciClicked cciNow = cciNone;
-   Tip *tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_index);
-   if(CheckPointer(tip)!=POINTER_INVALID)
-      tip.cciWaveInfo.setCCIState();
-  }
-// +------------------------------------------------------------------+
-// | get CCI state                                                    |
-// +------------------------------------------------------------------+
-cciClicked  MonitorFlow::cciGetState(int _ins, int _index)
-  {
-   Tip *tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_index);
-   if(CheckPointer(tip)!=POINTER_INVALID)
-      return tip.cciWaveInfo.getCCIState();
-   return cciNone;
-  }
+//// +------------------------------------------------------------------+
+//// | set CCI Click State by calling get which sets first              |
+//// +------------------------------------------------------------------+
+//void  MonitorFlow::cciSetState(int _ins, int _index)
+//  {
+//   cciClicked cciNow = cciNone;
+//   Tip *tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_index);
+//   if(CheckPointer(tip)!=POINTER_INVALID)
+//      tip.cciWaveInfo.setCCIState();
+//  }
+//// +------------------------------------------------------------------+
+//// | get CCI state                                                    |
+//// +------------------------------------------------------------------+
+//cciClicked  MonitorFlow::cciGetState(int _ins, int _index)
+//  {
+//   Tip *tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_index);
+//   if(CheckPointer(tip)!=POINTER_INVALID)
+//      return tip.cciWaveInfo.getCCIState();
+//   return cciNone;
+//  }
 //// |------------------------------------------------------------------+
 //// | checkSellTrendWave                                               |
 //// | check up leg on chart bar trend - selling off a peak             |
