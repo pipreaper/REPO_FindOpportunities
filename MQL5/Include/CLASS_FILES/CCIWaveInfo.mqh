@@ -30,7 +30,7 @@ public:
    double            CCIWaveInfo::getCCIValue(void);
   };
 //+------------------------------------------------------------------+
-//| CCIWaveInfo                                                      |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
 void CCIWaveInfo::CCIWaveInfo(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, int _cciRange, int _cciAppliedPrice,string _cciCatalystID) : CCIInfo(_symbol,_waveHTFPeriod,_cciRange, _cciAppliedPrice,_cciCatalystID)
   {

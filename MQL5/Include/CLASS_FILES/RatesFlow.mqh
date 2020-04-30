@@ -149,11 +149,17 @@ bool              RatesFlow::initIndicatorsTick()
                return false;
               }
             else
-              {
-               //for(int i = ArraySize(tempGetAtrValues)-1; i >0 ; i--)
-               // Print(i," ",tempGetAtrValues[i]);
-               Print(__FUNCTION__," ATR Values, Want: ",startCandle, " Bars,  Found: ",CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,startCandle, tempGetAtrValues)," Bars ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));
-              }
+               if(CopyBuffer(rTip.cciWaveInfo.cciHandle,0,0,startCandle, tempGetAtrValues) < startCandle)
+                 {
+                  Print(__FUNCTION__," couldnt get cci values -> want: ",startCandle, "  found: ",CopyBuffer(rTip.cciWaveInfo.cciHandle,0,0,startCandle, tempGetAtrValues)," ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));
+                  return false;
+                 }
+               else
+                 {
+                  //for(int i = ArraySize(tempGetAtrValues)-1; i >0 ; i--)
+                  // Print(i," ",tempGetAtrValues[i]);
+                  Print(__FUNCTION__," ATR Values, Want: ",startCandle, " Bars,  Found: ",CopyBuffer(rTip.atrWaveInfo.atrHandle,0,0,startCandle, tempGetAtrValues)," Bars ",rTip.symbol," ",EnumToString(rTip.waveHTFPeriod));
+                 }
            }
         }
      }

@@ -178,8 +178,6 @@ void  SetUpFlow::runNewBarInstruments(int _ins)
          else
             tip.atrWaveInfo.setWaveHeightPointsFixed(tip.onScreenWaveHeight);
          tip.cciWaveInfo.setCCIValues(1);
-         //   if(tip.cciWaveInfo.waveHTFPeriod == PERIOD_M30 && (tip.cciWaveInfo.cciWrapper.cciValue[0] > 100 || tip.cciWaveInfo.cciWrapper.cciValue[0] < -100))
-         //    DebugBreak();
          tip.cciWaveInfo.setCCIState();
         }
      }
