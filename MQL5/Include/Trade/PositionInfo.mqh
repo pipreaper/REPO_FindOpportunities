@@ -64,10 +64,10 @@ public:
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
 CPositionInfo::CPositionInfo(void) : m_type(WRONG_VALUE),
-                                     m_volume(0.0),
-                                     m_price(0.0),
-                                     m_stop_loss(0.0),
-                                     m_take_profit(0.0)
+   m_volume(0.0),
+   m_price(0.0),
+   m_stop_loss(0.0),
+   m_take_profit(0.0)
   {
   }
 //+------------------------------------------------------------------+
@@ -242,9 +242,14 @@ string CPositionInfo::FormatType(string &str,const uint type) const
 //--- see the type
    switch(type)
      {
-      case POSITION_TYPE_BUY : str="buy";  break;
-      case POSITION_TYPE_SELL: str="sell"; break;
-      default                : str="unknown position type "+(string)type;
+      case POSITION_TYPE_BUY :
+         str="buy";
+         break;
+      case POSITION_TYPE_SELL:
+         str="sell";
+         break;
+      default                :
+         str="unknown position type "+(string)type;
      }
 //--- return the result
    return(str);
@@ -348,10 +353,10 @@ void CPositionInfo::StoreState(void)
 //+------------------------------------------------------------------+
 bool CPositionInfo::CheckState(void)
   {
-   if(m_type==PositionType() && 
-      m_volume==Volume() && 
-      m_price==PriceOpen() && 
-      m_stop_loss==StopLoss() && 
+   if(m_type==PositionType() &&
+      m_volume==Volume() &&
+      m_price==PriceOpen() &&
+      m_stop_loss==StopLoss() &&
       m_take_profit==TakeProfit())
       return(false);
 //---

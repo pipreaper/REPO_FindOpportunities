@@ -18,7 +18,7 @@ class ContainerDiagonalTip: public vectorContainerTip<DiagTip*>
   {
 private:
 public:
-   void              ContainerDiagonalTip::ContainerDiagonalTip();   
+   void              ContainerDiagonalTip::ContainerDiagonalTip();
    void              ContainerDiagonalTip::ToLog(string desc,bool show);
    void              ContainerDiagonalTip::~ContainerDiagonalTip();
   };
@@ -32,18 +32,18 @@ void ContainerDiagonalTip::ContainerDiagonalTip() {}
 // +------------------------------------------------------------------+
 void ContainerDiagonalTip::~ContainerDiagonalTip()
   {
-   //DiagTip *diagTip = NULL;
-   //for(int i=0; i<Total(); i++)
-   //  {
-   //   diagTip = this.GetNodeAtIndex(i);
-   //   if(CheckPointer(diagTip)!=POINTER_INVALID)
-   //     {
-   //      cleanDiagLine(diagTip);
-   //     }
-   //   else
-   //      Print(__FUNCTION__," POINTER_INVALID ->Tip Number: ",i," pointer: ",diagTip);
-   //  }
-   //Clear();
+//DiagTip *diagTip = NULL;
+//for(int i=0; i<Total(); i++)
+//  {
+//   diagTip = this.GetNodeAtIndex(i);
+//   if(CheckPointer(diagTip)!=POINTER_INVALID)
+//     {
+//      cleanDiagLine(diagTip);
+//     }
+//   else
+//      Print(__FUNCTION__," POINTER_INVALID ->Tip Number: ",i," pointer: ",diagTip);
+//  }
+//Clear();
   }
 // +------------------------------------------------------------------+
 // |To Log: last node to print is most current                        |

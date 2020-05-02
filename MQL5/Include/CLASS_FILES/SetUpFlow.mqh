@@ -19,87 +19,87 @@ public:
    dataLoadState        dls;
    void                 SetUpFlow::SetUpFlow();
    setUpState           SetUpFlow::checkEntryTrigger(int _ins,int _shift);
-   void                 SetUpFlow::checkMoveDiagLine(int _ins);
    setUpState           SetUpFlow::getSetUpState();
-   void                 SetUpFlow::haveTrendSetup(int _ins);
-   //void                 SetUpFlow::haveCCISetup(int _ins);
-   //bool                 SetUpFlow::isThird();
-   //bool                 SetUpFlow::isInRange();
+   void                 SetUpFlow::setCatalystState(int _ins);
    // check extreme candle
    bool                 SetUpFlow::isExtremum(ENUM_POSITION_TYPE _posType);
    void                 SetUpFlow::initSetUpFlow();
    bool                 SetUpFlow::startStrategyComponents(int _ins, int _iTF);
    void                 SetUpFlow::outTipStates(int _ins, string _action, int _shift, int _count);
    void                 SetUpFlow::runNewBarInstruments(int _ins);
-   //void                 SetUpFlow::setStopTargetsByATR(int _ins, double _marketBidPrice,ENUM_ORDER_TYPE _bs);
+   void                 SetUpFlow::setMoveDiagLineValues(int _ins, int _index);
    void                 SetUpFlow::setSetUpState(setUpState _suState);
+   //void                 SetUpFlow::haveCCISetup(int _ins);
+   //bool                 SetUpFlow::isThird();
+   //bool                 SetUpFlow::isInRange();
+   //void                 SetUpFlow::setStopTargetsByATR(int _ins, double _marketBidPrice,ENUM_ORDER_TYPE _bs);
    void SetUpFlow::     ~SetUpFlow();
   };
 // +------------------------------------------------------------------+
 // |drawDiagLines                                                     |
 // +------------------------------------------------------------------+
-void  SetUpFlow::checkMoveDiagLine(int _ins)
+void  SetUpFlow::setMoveDiagLineValues(int _ins, int _index)
   {
    DiagTip *diagTip=NULL;
-   for(int instrumentTrend=0; (instrumentTrend<instrumentPointers[_ins].pContainerTip.Total()); instrumentTrend++)
+//for(int instrumentTrend=0; (instrumentTrend<instrumentPointers[_ins].pContainerTip.Total()); instrumentTrend++)
+//  {
+   if(CheckPointer(diagTip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_index))!= POINTER_INVALID)
      {
-      if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend))!= POINTER_INVALID)
+      diagTip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_index);
+      //tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend);
+      // Only call if its a new chart Bar for HTF under containeration
+      //*****************************************8 !!! NO because its against checking for congestion on a htf bar (new bar in Tip) only for chart bar ****************
+      //    if(isNewHTF(diagTip,_shift))
+      //     {
+      //  if(            isDate(0,45,3,2,1,2019))
+      //  Print(index);
+      if((diagTip.getTipState() == up) && (diagTip.getPrevTipState() != up))
         {
-         diagTip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend);
-         //tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(instrumentTrend);
-         // Only call if its a new chart Bar for HTF under containeration
-         //*****************************************8 !!! NO because its against checking for congestion on a htf bar (new bar in Tip) only for chart bar ****************
-         //    if(isNewHTF(diagTip,_shift))
-         //     {
-         //  if(            isDate(0,45,3,2,1,2019))
-         //  Print(index);
-         if((diagTip.getTipState() == up) && (diagTip.getPrevTipState() != up))
+         // draw support or resistance
+         //      Print(__FUNCTION__," before setUpState: ",EnumToString(getSetUpState()));
+         //    Print(__FUNCTION__," ",index," before  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
+         //     Print(__FUNCTION__," ","before x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
+         diagTip.moveDiagLine(diagTip.tipePntrs[0].rightPrice,diagTip.tipePntrs[2].rightPrice,diagTip.tipePntrs[0].rightTime,diagTip.tipePntrs[2].rightTime);
+         diagTip.setPrevTipState(diagTip.getTipState());
+         //       Print(__FUNCTION__," ","after x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
+         //      Print(__FUNCTION__," ",index," after  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
+         //       Print(__FUNCTION__," after setUpState: ",EnumToString(getSetUpState()));
+         //        Print(" ");
+        }
+      else
+         if((diagTip.getTipState() == down) && (diagTip.getPrevTipState() != down))
            {
-            // draw support or resistance
-            //      Print(__FUNCTION__," before setUpState: ",EnumToString(getSetUpState()));
-            //    Print(__FUNCTION__," ",index," before  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
-            //     Print(__FUNCTION__," ","before x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
+            //       Print(__FUNCTION__," before setUpState: ",EnumToString(getSetUpState()));
+            //        Print(__FUNCTION__," ",index," before  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
+            //       Print(__FUNCTION__," ","before x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
             diagTip.moveDiagLine(diagTip.tipePntrs[0].rightPrice,diagTip.tipePntrs[2].rightPrice,diagTip.tipePntrs[0].rightTime,diagTip.tipePntrs[2].rightTime);
             diagTip.setPrevTipState(diagTip.getTipState());
-            //       Print(__FUNCTION__," ","after x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
-            //      Print(__FUNCTION__," ",index," after  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
+            //        Print(__FUNCTION__," ","after x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
+            //        Print(__FUNCTION__," ",index," after  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
             //       Print(__FUNCTION__," after setUpState: ",EnumToString(getSetUpState()));
-            //        Print(" ");
+            //       Print(" ");
            }
          else
-            if((diagTip.getTipState() == down) && (diagTip.getPrevTipState() != down))
+            if((diagTip.getTipState() == congested) && (diagTip.getPrevTipState() != congested))
               {
-               //       Print(__FUNCTION__," before setUpState: ",EnumToString(getSetUpState()));
-               //        Print(__FUNCTION__," ",index," before  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
+               //        Print(__FUNCTION__," before setUpState: ",EnumToString(getSetUpState()));
+               //       Print(__FUNCTION__," ",index," before  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
                //       Print(__FUNCTION__," ","before x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
-               diagTip.moveDiagLine(diagTip.tipePntrs[0].rightPrice,diagTip.tipePntrs[2].rightPrice,diagTip.tipePntrs[0].rightTime,diagTip.tipePntrs[2].rightTime);
+               diagTip.moveDiagLine(diagTip.tipePntrs[3].rightPrice,diagTip.tipePntrs[3].rightPrice,diagTip.tipePntrs[0].rightTime,diagTip.tipePntrs[2].rightTime);
                diagTip.setPrevTipState(diagTip.getTipState());
-               //        Print(__FUNCTION__," ","after x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
-               //        Print(__FUNCTION__," ",index," after  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
+               //       Print(__FUNCTION__," ","after x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
+               //       Print(__FUNCTION__," ",index," after  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
                //       Print(__FUNCTION__," after setUpState: ",EnumToString(getSetUpState()));
                //       Print(" ");
               }
-            else
-               if((diagTip.getTipState() == congested) && (diagTip.getPrevTipState() != congested))
-                 {
-                  //        Print(__FUNCTION__," before setUpState: ",EnumToString(getSetUpState()));
-                  //       Print(__FUNCTION__," ",index," before  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
-                  //       Print(__FUNCTION__," ","before x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
-                  diagTip.moveDiagLine(diagTip.tipePntrs[3].rightPrice,diagTip.tipePntrs[3].rightPrice,diagTip.tipePntrs[0].rightTime,diagTip.tipePntrs[2].rightTime);
-                  diagTip.setPrevTipState(diagTip.getTipState());
-                  //       Print(__FUNCTION__," ","after x[0]: ",diagTip.tipePntrs[0].rightPrice," y[0]: ",diagTip.tipePntrs[2].rightPrice,"x[1]: ",diagTip.tipePntrs[1].rightTime," y[1]: ",diagTip.tipePntrs[2].rightTime);
-                  //       Print(__FUNCTION__," ",index," after  Diagtip get tip / get prev tip: ",EnumToString(diagTip.getTipState())," ",EnumToString(diagTip.getPrevTipState()));
-                  //       Print(__FUNCTION__," after setUpState: ",EnumToString(getSetUpState()));
-                  //       Print(" ");
-                 }
-         //    }
-        }
+      //    }
      }
+//   }
   }
 // +------------------------------------------------------------------+
 // |haveSetup                                                         |
 // +------------------------------------------------------------------+
-void  SetUpFlow::haveTrendSetup(int _ins)
+void  SetUpFlow::setCatalystState(int _ins)
   {
    DiagTip *minorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
    DiagTip *majorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
@@ -169,10 +169,13 @@ void  SetUpFlow::runNewBarInstruments(int _ins)
    ArraySetAsSeries(instrumentPointers[_ins].pContainerTip.ratesCTF,true);
    for(int index=0; (index<instrumentPointers[_ins].pContainerTip.Total()); index++)
      {
-      if(CheckPointer(instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index))!= POINTER_INVALID)
+      if(CheckPointer(tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index))!= POINTER_INVALID)
         {
-         tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index);
-         tip.processHTFTrendBar();
+         //  tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index);
+         CopyRates(tip.symbol,tip.waveHTFPeriod,0,101,tip.ratesThisTF);
+         ArraySetAsSeries(tip.ratesThisTF,true);
+         tip.setWaveArmValues(1);
+         tip.setWaveArmStates(1);
          if(wCalcSizeType == waveCalcATR)
             tip.atrWaveInfo.setWaveHeightPointsATR(tip.onScreenWaveHeight,1);
          else
@@ -180,6 +183,8 @@ void  SetUpFlow::runNewBarInstruments(int _ins)
          tip.cciWaveInfo.setCCIValues(1);
          tip.cciWaveInfo.setCCIState();
         }
+      setMoveDiagLineValues(_ins,1);
+      setCatalystState(_ins);
      }
    Lip *level=NULL;
 // ** CHECK FOR NEW LEVEL DATA FOR EACH ACTIVE PERIOD
@@ -448,8 +453,8 @@ bool              SetUpFlow::startStrategyComponents(int _ins, int _iTF)
             rTip.atrWaveInfo.setWaveHeightPointsFixed(rTip.onScreenWaveHeight);
          // new bar info
          condition = rTip.processTrendBarInit(shift);
-         checkMoveDiagLine(_ins);
-         haveTrendSetup(_ins);
+         setMoveDiagLineValues(_ins,shift);
+         setCatalystState(_ins);
          checkEntryTrigger(_ins, shift);
         }
      }

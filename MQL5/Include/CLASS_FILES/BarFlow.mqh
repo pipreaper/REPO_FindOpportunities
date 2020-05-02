@@ -84,7 +84,7 @@ public:
       int                  _sl,
       int                  _tp,
       int                  _deltaFireRoom,
-      int                  _candlesToExpire,      
+      int                  _candlesToExpire,
       int                  _numDefineWave,
       waveCalcSizeType     _wCalcSizeType,
       int                  _atrRange,
@@ -189,7 +189,7 @@ bool BarFlow::initBarFlow(
    tp             =  _tp;
    dev = _dev;
    deltaFireRoom =_deltaFireRoom;
-      candlesToExpire=_candlesToExpire;   
+   candlesToExpire=_candlesToExpire;
    showPanel=_showPanel;
 // how many waves make a trend calculation(4)
    numDefineWave=_numDefineWave;
