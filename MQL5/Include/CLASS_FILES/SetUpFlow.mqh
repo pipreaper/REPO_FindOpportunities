@@ -134,7 +134,7 @@ setUpState              SetUpFlow::checkEntryTrigger(int _ins, int _shift)
       //  int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
       majorTrend.updateTrendPriceTime(majorTrend.parent.ratesCTF[_shift].time);
 
-      if(majorTrend.cciWaveInfo.cciWrapper.cciValue[0] > majorTrend.cciTriggerLevel)
+      if(majorTrend.cciWaveInfo.getCCIValue(majorTrend.parent.ratesCTF[_shift].time) > majorTrend.cciTriggerLevel)
          this.setSetUpState(open_long);
       // and check support line has been breached
       //if(//(minorTrend.parent.ratesCTF[1].low > minorTrend.YVals[1])&&
@@ -154,7 +154,7 @@ setUpState              SetUpFlow::checkEntryTrigger(int _ins, int _shift)
          // (minorTrend.parent.ratesCTF[1].open < majorTrend.YVals[1])
          //      (minorTrend.parent.ratesCTF[1].high < MathMax(majorTrend.ratesHTF[1].high,majorTrend.ratesHTF[2].high))
          // )
-         if(majorTrend.cciWaveInfo.cciWrapper.cciValue[0] < -majorTrend.cciTriggerLevel)
+         if(majorTrend.cciWaveInfo.getCCIValue(majorTrend.parent.ratesCTF[_shift].time) < -majorTrend.cciTriggerLevel)
             this.setSetUpState(open_short);
         }
    return this.getSetUpState();
@@ -181,7 +181,7 @@ void  SetUpFlow::runNewBarInstruments(int _ins)
          else
             tip.atrWaveInfo.setWaveHeightPointsFixed(tip.onScreenWaveHeight);
          tip.cciWaveInfo.setCCIValues(1);
-         tip.cciWaveInfo.setCCIState();
+         tip.cciWaveInfo.setCCIState(tip.ratesThisTF[1].time);
         }
       setMoveDiagLineValues(_ins,1);
       setCatalystState(_ins);

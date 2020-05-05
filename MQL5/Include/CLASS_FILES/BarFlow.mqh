@@ -641,8 +641,8 @@ bool  BarFlow::createTrendObjects(bool _isSingleSymbol,int  _totalTrendsConsider
    datetime tmeStart = iTime(NULL,_trendTF1, iBarShift(NULL,_trendTF1,iTime(NULL,_trendTF2,101)));
    if(tmeStart == 0)
      {
-      Alert("Init Failed - Not Enough Data for HTF: Adjust The Start Run From Date");
-      DebugBreak();
+      Alert(__FUNCTION__," *** Init Failed - Not Enough Data for HTF: Adjust The Start Run From Date");
+    //  DebugBreak();
       return false;
      }
    return true;

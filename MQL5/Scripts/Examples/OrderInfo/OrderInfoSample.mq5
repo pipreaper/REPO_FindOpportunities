@@ -46,8 +46,7 @@ COrderInfoSample ExtScript;
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-COrderInfoSample::COrderInfoSample(void) : m_curr_ord(-1),
-                                           m_total_ord(-1)
+COrderInfoSample::COrderInfoSample(void) : m_curr_ord(-1), m_total_ord(-1)
   {
   }
 //+------------------------------------------------------------------+

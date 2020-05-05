@@ -79,13 +79,13 @@ public:
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
 COrderInfo::COrderInfo(void) : m_ticket(ULONG_MAX),
-   m_type(WRONG_VALUE),
-   m_state(WRONG_VALUE),
-   m_expiration(0),
-   m_volume_curr(0.0),
-   m_price_open(0.0),
-   m_stop_loss(0.0),
-   m_take_profit(0.0)
+                               m_type(WRONG_VALUE),
+                               m_state(WRONG_VALUE),
+                               m_expiration(0),
+                               m_volume_curr(0.0),
+                               m_price_open(0.0),
+                               m_stop_loss(0.0),
+                               m_take_profit(0.0)
   {
   }
 //+------------------------------------------------------------------+
@@ -315,33 +315,15 @@ string COrderInfo::FormatType(string &str,const uint type) const
 //--- see the type
    switch(type)
      {
-      case ORDER_TYPE_BUY            :
-         str="buy";
-         break;
-      case ORDER_TYPE_SELL           :
-         str="sell";
-         break;
-      case ORDER_TYPE_BUY_LIMIT      :
-         str="buy limit";
-         break;
-      case ORDER_TYPE_SELL_LIMIT     :
-         str="sell limit";
-         break;
-      case ORDER_TYPE_BUY_STOP       :
-         str="buy stop";
-         break;
-      case ORDER_TYPE_SELL_STOP      :
-         str="sell stop";
-         break;
-      case ORDER_TYPE_BUY_STOP_LIMIT :
-         str="buy stop limit";
-         break;
-      case ORDER_TYPE_SELL_STOP_LIMIT:
-         str="sell stop limit";
-         break;
-      case ORDER_TYPE_CLOSE_BY       :
-         str="close by";
-         break;
+      case ORDER_TYPE_BUY            : str="buy";             break;
+      case ORDER_TYPE_SELL           : str="sell";            break;
+      case ORDER_TYPE_BUY_LIMIT      : str="buy limit";       break;
+      case ORDER_TYPE_SELL_LIMIT     : str="sell limit";      break;
+      case ORDER_TYPE_BUY_STOP       : str="buy stop";        break;
+      case ORDER_TYPE_SELL_STOP      : str="sell stop";       break;
+      case ORDER_TYPE_BUY_STOP_LIMIT : str="buy stop limit";  break;
+      case ORDER_TYPE_SELL_STOP_LIMIT: str="sell stop limit"; break;
+      case ORDER_TYPE_CLOSE_BY       : str="close by";        break;
 
       default:
          str="unknown order type "+(string)type;
@@ -360,36 +342,16 @@ string COrderInfo::FormatStatus(string &str,const uint status) const
 //--- see the type
    switch(status)
      {
-      case ORDER_STATE_STARTED       :
-         str="started";
-         break;
-      case ORDER_STATE_PLACED        :
-         str="placed";
-         break;
-      case ORDER_STATE_CANCELED      :
-         str="canceled";
-         break;
-      case ORDER_STATE_PARTIAL       :
-         str="partial";
-         break;
-      case ORDER_STATE_FILLED        :
-         str="filled";
-         break;
-      case ORDER_STATE_REJECTED      :
-         str="rejected";
-         break;
-      case ORDER_STATE_EXPIRED       :
-         str="expired";
-         break;
-      case ORDER_STATE_REQUEST_ADD   :
-         str="request adding";
-         break;
-      case ORDER_STATE_REQUEST_MODIFY:
-         str="request modifying";
-         break;
-      case ORDER_STATE_REQUEST_CANCEL:
-         str="request cancelling";
-         break;
+      case ORDER_STATE_STARTED       : str="started";            break;
+      case ORDER_STATE_PLACED        : str="placed";             break;
+      case ORDER_STATE_CANCELED      : str="canceled";           break;
+      case ORDER_STATE_PARTIAL       : str="partial";            break;
+      case ORDER_STATE_FILLED        : str="filled";             break;
+      case ORDER_STATE_REJECTED      : str="rejected";           break;
+      case ORDER_STATE_EXPIRED       : str="expired";            break;
+      case ORDER_STATE_REQUEST_ADD   : str="request adding";     break;
+      case ORDER_STATE_REQUEST_MODIFY: str="request modifying";  break;
+      case ORDER_STATE_REQUEST_CANCEL: str="request cancelling"; break;
 
       default:
          str="unknown order status "+(string)status;
@@ -408,15 +370,9 @@ string COrderInfo::FormatTypeFilling(string &str,const uint type) const
 //--- see the type
    switch(type)
      {
-      case ORDER_FILLING_RETURN:
-         str="return remainder";
-         break;
-      case ORDER_FILLING_IOC   :
-         str="cancel remainder";
-         break;
-      case ORDER_FILLING_FOK   :
-         str="fill or kill";
-         break;
+      case ORDER_FILLING_RETURN: str="return remainder"; break;
+      case ORDER_FILLING_IOC   : str="cancel remainder"; break;
+      case ORDER_FILLING_FOK   : str="fill or kill";     break;
 
       default:
          str="unknown type filling "+(string)type;
@@ -435,18 +391,10 @@ string COrderInfo::FormatTypeTime(string &str,const uint type) const
 //--- see the type
    switch(type)
      {
-      case ORDER_TIME_GTC          :
-         str="gtc";
-         break;
-      case ORDER_TIME_DAY          :
-         str="day";
-         break;
-      case ORDER_TIME_SPECIFIED    :
-         str="specified";
-         break;
-      case ORDER_TIME_SPECIFIED_DAY:
-         str="specified day";
-         break;
+      case ORDER_TIME_GTC          : str="gtc";           break;
+      case ORDER_TIME_DAY          : str="day";           break;
+      case ORDER_TIME_SPECIFIED    : str="specified";     break;
+      case ORDER_TIME_SPECIFIED_DAY: str="specified day"; break;
 
       default:
          str="unknown type time "+(string)type;
@@ -557,11 +505,11 @@ void COrderInfo::StoreState(void)
 bool COrderInfo::CheckState(void)
   {
    if(m_type==OrderType()             &&
-      m_state==State()                &&
+      m_state==State()                && 
       m_expiration ==TimeExpiration() &&
       m_volume_curr==VolumeCurrent()  &&
       m_price_open==PriceOpen()       &&
-      m_stop_loss==StopLoss()         &&
+      m_stop_loss==StopLoss()         && 
       m_take_profit==TakeProfit())
       return(false);
 //---

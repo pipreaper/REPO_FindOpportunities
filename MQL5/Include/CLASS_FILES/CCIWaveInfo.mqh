@@ -22,75 +22,71 @@ class CCIWaveInfo : public CCIInfo
 public:
    double            pointSize;
    int               digits;
-   void              CCIWaveInfo::CCIWaveInfo(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, int _cciRange, int _cciAppliedPrice, string _cciCatalystID);
-   void              CCIWaveInfo::cciInit(double _cciTriggerLevel, double _cciExitLevel);
+   void              CCIWaveInfo::CCIWaveInfo();
+   bool              CCIWaveInfo::cciInitialise(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, int _cciRange, int _cciAppliedPrice, string _cciCatalystID,int _numInitValues,double _cciTriggerLevel, double _cciExitLevel);
    bool              CCIWaveInfo::setCCIValues(int _shift);
-   void              CCIWaveInfo::setCCIState(void);
+   void              CCIWaveInfo::setCCIState(datetime _time);
    cciClicked        CCIWaveInfo::getCCIState(void);
-   double            CCIWaveInfo::getCCIValue(void);
+   double            CCIWaveInfo::getCCIValue(datetime _time);
   };
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-void CCIWaveInfo::CCIWaveInfo(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, int _cciRange, int _cciAppliedPrice,string _cciCatalystID) : CCIInfo(_symbol,_waveHTFPeriod,_cciRange, _cciAppliedPrice,_cciCatalystID)
-  {
-  }
+void CCIWaveInfo::CCIWaveInfo() {}
 //+------------------------------------------------------------------+
-//| set onscreen text and wave height for this bar variable by ATR   |
-//| for this bar                                                     |
+//| Set trigger and exit levels                                      |
 //+------------------------------------------------------------------+
-bool              CCIWaveInfo::setCCIValues(int _shift)
+bool CCIWaveInfo::cciInitialise(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, int _cciPeriod, int _cciAppliedPrice, string _catalystID,int _numInitValues, double _cciTriggerLevel, double _cciExitLevel)
   {
-   bool condition = true;
-   if(CopyBuffer(cciHandle,0,_shift,1, cciWrapper.cciValue) <= 0)
+   bool condition = false;
+   if(CCIInfo::cciInitialise(_symbol,_waveHTFPeriod, _cciPeriod, _cciAppliedPrice, _catalystID, _numInitValues))
      {
-      condition = false;
-      Print(__FUNCTION__," shift: ",_shift," cciWrapper.cciValue[0] ",cciWrapper.cciValue[0]);
+      cciTriggerLevel   =  _cciTriggerLevel;
+      cciExitLevel      =  _cciExitLevel;
+      condition = true;
      }
    return condition;
   }
 //+------------------------------------------------------------------+
-//| CCISetWaveInfo                                                   |
+//| set values according to chart bar [1] of HTF                     |
 //+------------------------------------------------------------------+
-void              CCIWaveInfo::cciInit(double _cciTriggerLevel, double _cciExitLevel)
+bool  CCIWaveInfo::setCCIValues(int _shift)
   {
-   cciTriggerLevel=_cciTriggerLevel;
-   cciExitLevel=_cciExitLevel;
-   cciState = cciNone;
-   ArrayResize(cciWrapper.cciValue,1);
-   ArraySetAsSeries(cciWrapper.cciValue,true);
-   cciWrapper.cciValue[0]=-1;
-   SymbolInfoDouble(symbol,SYMBOL_POINT,pointSize);
-   digits = int(SymbolInfoInteger(symbol,SYMBOL_DIGITS));
+   bool condition = true;
+   if(CopyBuffer(cciHandle,0,_shift,numInitValues-1, cciValue) <= 0)
+     {
+      condition = false;
+      Print(__FUNCTION__," shift: ",_shift," cciValue does not have enough values#: ", ArraySize(cciValue));
+     }
+   return condition;
   }
 //+------------------------------------------------------------------+
-//|                                               |
+//| Determine state from previous chart bar [1]                      |
 //+------------------------------------------------------------------+
-void              CCIWaveInfo::setCCIState()
+void              CCIWaveInfo::setCCIState(datetime _time)
   {
-//if(cciWrapper.cciValue[0]==-1 || cciWrapper.cciValue[0]==0)
-//   DebugBreak();
-   if(cciWrapper.cciValue[0] > cciTriggerLevel)
+  //int shift = iBarShift(symbol,waveHTFPeriod,_time,true);
+   if(getCCIValue(_time) > cciTriggerLevel)
       cciState=cciAbove100;
    else
-      if(cciWrapper.cciValue[0]<-cciTriggerLevel)
+      if(getCCIValue(_time)<-cciTriggerLevel)
          cciState = cciBelow100;
       else
-         if((cciState == cciAbove100) && (cciWrapper.cciValue[0] < cciExitLevel))
+         if((cciState == cciAbove100) && (getCCIValue(_time) < cciExitLevel))
             cciState = cciNone;
          else
-            if((cciState == cciBelow100) && (cciWrapper.cciValue[0] > -cciExitLevel))
+            if((cciState == cciBelow100) && (getCCIValue(_time) > -cciExitLevel))
                cciState = cciNone;
   }
 //+------------------------------------------------------------------+
-//| setWaveHeightPoints                                              |
+//| get value                                                        |
 //+------------------------------------------------------------------+
-double              CCIWaveInfo::getCCIValue()
+double              CCIWaveInfo::getCCIValue(datetime _time)
   {
-   return this.cciWrapper.cciValue[0];
+   return cciValue[iBarShift(symbol,waveHTFPeriod,_time,true)];
   }
 //+------------------------------------------------------------------+
-//| setWaveHeightPoints                                              |
+//| get State                                                        |
 //+------------------------------------------------------------------+
 cciClicked              CCIWaveInfo::getCCIState()
   {

@@ -258,8 +258,9 @@ bool Tip::addIndicators(void)
 //initialise new clases of indicators -> each Tip has a copy
    atrWaveInfo  = new ATRWaveInfo(symbol,waveHTFPeriod,atrRange,TRD);
    atrWaveInfo.atrInit(scaleATR,this.showPanel);
-   cciWaveInfo  = new CCIWaveInfo(symbol,waveHTFPeriod,cciPeriod,cciAppliedPrice,"TRD");
-   cciWaveInfo.cciInit(cciTriggerLevel, cciExitLevel);
+   cciWaveInfo  = new CCIWaveInfo();
+   int numCCIValues = 50;
+   cciWaveInfo.cciInitialise(symbol,waveHTFPeriod,cciPeriod,cciAppliedPrice,"TRD",numCCIValues,cciTriggerLevel, cciExitLevel);
 //  emaInfo= new EMAInfo(symbol,waveHTFPeriod,emaTrendPeriod,emaTrendShift,emaTrendMethod,emaTrendAppliedPrice,"TRD");
    return true;
   }

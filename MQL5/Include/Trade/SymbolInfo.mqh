@@ -158,33 +158,33 @@ public:
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
 CSymbolInfo::CSymbolInfo(void) : m_name(NULL),
-   m_point(0.0),
-   m_tick_value(0.0),
-   m_tick_value_profit(0.0),
-   m_tick_value_loss(0.0),
-   m_tick_size(0.0),
-   m_contract_size(0.0),
-   m_lots_min(0.0),
-   m_lots_max(0.0),
-   m_lots_step(0.0),
-   m_swap_long(0.0),
-   m_swap_short(0.0),
-   m_digits(0),
-   m_order_mode(0),
-   m_trade_execution(0),
-   m_trade_calcmode(0),
-   m_trade_mode(0),
-   m_swap_mode(0),
-   m_swap3(0),
-   m_margin_initial(0.0),
-   m_margin_maintenance(0.0),
-   m_margin_long(0.0),
-   m_margin_short(0.0),
-   m_margin_limit(0.0),
-   m_margin_stop(0.0),
-   m_margin_stoplimit(0.0),
-   m_trade_time_flags(0),
-   m_trade_fill_flags(0)
+                                 m_point(0.0),
+                                 m_tick_value(0.0),
+                                 m_tick_value_profit(0.0),
+                                 m_tick_value_loss(0.0),
+                                 m_tick_size(0.0),
+                                 m_contract_size(0.0),
+                                 m_lots_min(0.0),
+                                 m_lots_max(0.0),
+                                 m_lots_step(0.0),
+                                 m_swap_long(0.0),
+                                 m_swap_short(0.0),
+                                 m_digits(0),
+                                 m_order_mode(0),
+                                 m_trade_execution(0),
+                                 m_trade_calcmode(0),
+                                 m_trade_mode(0),
+                                 m_swap_mode(0),
+                                 m_swap3(0),
+                                 m_margin_initial(0.0),
+                                 m_margin_maintenance(0.0),
+                                 m_margin_long(0.0),
+                                 m_margin_short(0.0),
+                                 m_margin_limit(0.0),
+                                 m_margin_stop(0.0),
+                                 m_margin_stoplimit(0.0),
+                                 m_trade_time_flags(0),
+                                 m_trade_fill_flags(0)
   {
   }
 //+------------------------------------------------------------------+
@@ -454,23 +454,12 @@ string CSymbolInfo::TradeModeDescription(void) const
 //---
    switch(m_trade_mode)
      {
-      case SYMBOL_TRADE_MODE_DISABLED :
-         str="Disabled";
-         break;
-      case SYMBOL_TRADE_MODE_LONGONLY :
-         str="Long only";
-         break;
-      case SYMBOL_TRADE_MODE_SHORTONLY:
-         str="Short only";
-         break;
-      case SYMBOL_TRADE_MODE_CLOSEONLY:
-         str="Close only";
-         break;
-      case SYMBOL_TRADE_MODE_FULL     :
-         str="Full access";
-         break;
-      default                         :
-         str="Unknown trade mode";
+      case SYMBOL_TRADE_MODE_DISABLED : str="Disabled";           break;
+      case SYMBOL_TRADE_MODE_LONGONLY : str="Long only";          break;
+      case SYMBOL_TRADE_MODE_SHORTONLY: str="Short only";         break;
+      case SYMBOL_TRADE_MODE_CLOSEONLY: str="Close only";         break;
+      case SYMBOL_TRADE_MODE_FULL     : str="Full access";        break;
+      default                         : str="Unknown trade mode";
      }
 //--- result
    return(str);
@@ -484,20 +473,11 @@ string CSymbolInfo::TradeExecutionDescription(void) const
 //---
    switch(m_trade_execution)
      {
-      case SYMBOL_TRADE_EXECUTION_REQUEST :
-         str="Trading on request";
-         break;
-      case SYMBOL_TRADE_EXECUTION_INSTANT :
-         str="Trading on live streaming prices";
-         break;
-      case SYMBOL_TRADE_EXECUTION_MARKET  :
-         str="Execution of orders on the market";
-         break;
-      case SYMBOL_TRADE_EXECUTION_EXCHANGE:
-         str="Exchange execution";
-         break;
-      default:
-         str="Unknown trade execution";
+      case SYMBOL_TRADE_EXECUTION_REQUEST : str="Trading on request";                break;
+      case SYMBOL_TRADE_EXECUTION_INSTANT : str="Trading on live streaming prices";  break;
+      case SYMBOL_TRADE_EXECUTION_MARKET  : str="Execution of orders on the market"; break;
+      case SYMBOL_TRADE_EXECUTION_EXCHANGE: str="Exchange execution";                break;
+      default:                              str="Unknown trade execution";
      }
 //--- result
    return(str);
@@ -553,29 +533,14 @@ string CSymbolInfo::SwapRollover3daysDescription(void) const
 //---
    switch(m_swap3)
      {
-      case SUNDAY   :
-         str="Sunday";
-         break;
-      case MONDAY   :
-         str="Monday";
-         break;
-      case TUESDAY  :
-         str="Tuesday";
-         break;
-      case WEDNESDAY:
-         str="Wednesday";
-         break;
-      case THURSDAY :
-         str="Thursday";
-         break;
-      case FRIDAY   :
-         str="Friday";
-         break;
-      case SATURDAY :
-         str="Saturday";
-         break;
-      default       :
-         str="Unknown";
+      case SUNDAY   : str="Sunday";    break;
+      case MONDAY   : str="Monday";    break;
+      case TUESDAY  : str="Tuesday";   break;
+      case WEDNESDAY: str="Wednesday"; break;
+      case THURSDAY : str="Thursday";  break;
+      case FRIDAY   : str="Friday";    break;
+      case SATURDAY : str="Saturday";  break;
+      default       : str="Unknown";
      }
 //--- result
    return(str);
