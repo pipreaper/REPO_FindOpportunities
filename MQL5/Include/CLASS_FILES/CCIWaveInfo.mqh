@@ -25,9 +25,9 @@ public:
    void              CCIWaveInfo::CCIWaveInfo();
    bool              CCIWaveInfo::cciInitialise(string _symbol,  ENUM_TIMEFRAMES _waveHTFPeriod, int _cciRange, int _cciAppliedPrice, string _cciCatalystID,int _numInitValues,double _cciTriggerLevel, double _cciExitLevel);
    bool              CCIWaveInfo::setCCIValues(int _shift);
-   void              CCIWaveInfo::setCCIState(datetime _time);
+   void              CCIWaveInfo::setCCIState(int _index);
    cciClicked        CCIWaveInfo::getCCIState(void);
-   double            CCIWaveInfo::getCCIValue(datetime _time);
+   double            CCIWaveInfo::getCCIValue(int _index);
   };
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
@@ -63,27 +63,27 @@ bool  CCIWaveInfo::setCCIValues(int _shift)
 //+------------------------------------------------------------------+
 //| Determine state from previous chart bar [1]                      |
 //+------------------------------------------------------------------+
-void              CCIWaveInfo::setCCIState(datetime _time)
+void              CCIWaveInfo::setCCIState(int _index)
   {
   //int shift = iBarShift(symbol,waveHTFPeriod,_time,true);
-   if(getCCIValue(_time) > cciTriggerLevel)
+   if(getCCIValue(_index) > cciTriggerLevel)
       cciState=cciAbove100;
    else
-      if(getCCIValue(_time)<-cciTriggerLevel)
+      if(getCCIValue(_index)<-cciTriggerLevel)
          cciState = cciBelow100;
       else
-         if((cciState == cciAbove100) && (getCCIValue(_time) < cciExitLevel))
+         if((cciState == cciAbove100) && (getCCIValue(_index) < cciExitLevel))
             cciState = cciNone;
          else
-            if((cciState == cciBelow100) && (getCCIValue(_time) > -cciExitLevel))
+            if((cciState == cciBelow100) && (getCCIValue(_index) > -cciExitLevel))
                cciState = cciNone;
   }
 //+------------------------------------------------------------------+
 //| get value                                                        |
 //+------------------------------------------------------------------+
-double              CCIWaveInfo::getCCIValue(datetime _time)
+double              CCIWaveInfo::getCCIValue(int _index)
   {
-   return cciValue[iBarShift(symbol,waveHTFPeriod,_time,true)];
+   return cciValue[_index];
   }
 //+------------------------------------------------------------------+
 //| get State                                                        |

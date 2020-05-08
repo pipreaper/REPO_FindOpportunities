@@ -17,7 +17,7 @@ class CCIInfo : public CObject
 public:
    string            symbol;
    int               cciHandle;
-   double             cciValue[];
+   double            cciValue[];
    int               cciPeriod;
    int               cciAppliedPrice;
    int               numInitValues;
@@ -56,6 +56,4 @@ void CCIInfo::~CCIInfo()
   {
    IndicatorRelease(cciHandle);
   }
-
-
 //+------------------------------------------------------------------+

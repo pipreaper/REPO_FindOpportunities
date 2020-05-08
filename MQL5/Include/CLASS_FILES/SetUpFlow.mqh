@@ -19,6 +19,7 @@ public:
    dataLoadState        dls;
    void                 SetUpFlow::SetUpFlow();
    setUpState           SetUpFlow::checkEntryTrigger(int _ins,int _shift);
+   bool              SetUpFlow::closeOnStateFailure(int _ins, int _index);
    setUpState           SetUpFlow::getSetUpState();
    void                 SetUpFlow::setCatalystState(int _ins);
    // check extreme candle
@@ -103,7 +104,7 @@ void  SetUpFlow::setCatalystState(int _ins)
   {
    DiagTip *minorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(0);
    DiagTip *majorTrend=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(1);
-   if((majorTrend.cciWaveInfo.getCCIState() == cciAbove100) && (minorTrend.cciWaveInfo.getCCIState() == cciBelow100))//&& (minorTrend.getTipState() == down)majorTrend.getTipState() == up)  && (
+   if((majorTrend.cciWaveInfo.getCCIState() == cciAbove100))// && (minorTrend.cciWaveInfo.getCCIState() == cciBelow100))//&& (minorTrend.getTipState() == down)majorTrend.getTipState() == up)  && (
       setSetUpState(waiting_trigger_break_resistance);
    else
       if((majorTrend.cciWaveInfo.getCCIState() == cciBelow100) && (minorTrend.cciWaveInfo.getCCIState() == cciAbove100))//&& (minorTrend.getTipState() == up)majorTrend.getTipState() == down)  && (
@@ -116,6 +117,29 @@ void  SetUpFlow::setCatalystState(int _ins)
                setSetUpState(trending);
             else
                setSetUpState(init_diag_line);
+  }
+//+------------------------------------------------------------------+
+//|If states no longer ture exit trade - no reason to be in it       |
+//+------------------------------------------------------------------+
+bool              SetUpFlow::closeOnStateFailure(int _ins, int _index)
+  {
+   bool condition = false;
+   Tip *tip=NULL;
+   if(CheckPointer(tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(_index))!= POINTER_INVALID)
+     {
+      ulong ticket = findFirstPositon(instrumentPointers[_ins].symbol);
+      //int ti = int(ticket);
+      if(int(ticket) >= 0)
+        {
+         myPosition.SelectByTicket(findFirstPositon(instrumentPointers[_ins].symbol));
+         if((myPosition.PositionType() == POSITION_TYPE_BUY) && (tip.cciWaveInfo.getCCIState() != cciAbove100))
+            condition = true;
+         else
+            if((myPosition.PositionType() == POSITION_TYPE_SELL) && (tip.cciWaveInfo.getCCIState() != cciBelow100))
+               condition = true;
+        }
+     }
+   return condition;
   }
 // +------------------------------------------------------------------+
 // |checkEntryTrigger                                                 |
@@ -134,7 +158,7 @@ setUpState              SetUpFlow::checkEntryTrigger(int _ins, int _shift)
       //  int htfShift = iBarShift(instrumentPointers[_ins].symbol,majorTrend.waveHTFPeriod,minorTrend.parent.ratesCTF[_shift].time,true);
       majorTrend.updateTrendPriceTime(majorTrend.parent.ratesCTF[_shift].time);
 
-      if(majorTrend.cciWaveInfo.getCCIValue(majorTrend.parent.ratesCTF[_shift].time) > majorTrend.cciTriggerLevel)
+      if((majorTrend.cciWaveInfo.getCCIValue(0) > majorTrend.cciTriggerLevel) && (minorTrend.cciWaveInfo.getCCIValue(0) < -minorTrend.cciTriggerLevel))
          this.setSetUpState(open_long);
       // and check support line has been breached
       //if(//(minorTrend.parent.ratesCTF[1].low > minorTrend.YVals[1])&&
@@ -154,7 +178,7 @@ setUpState              SetUpFlow::checkEntryTrigger(int _ins, int _shift)
          // (minorTrend.parent.ratesCTF[1].open < majorTrend.YVals[1])
          //      (minorTrend.parent.ratesCTF[1].high < MathMax(majorTrend.ratesHTF[1].high,majorTrend.ratesHTF[2].high))
          // )
-         if(majorTrend.cciWaveInfo.getCCIValue(majorTrend.parent.ratesCTF[_shift].time) < -majorTrend.cciTriggerLevel)
+         if((majorTrend.cciWaveInfo.getCCIValue(0) < -majorTrend.cciTriggerLevel) && (minorTrend.cciWaveInfo.getCCIValue(0) > minorTrend.cciTriggerLevel))
             this.setSetUpState(open_short);
         }
    return this.getSetUpState();
@@ -172,7 +196,7 @@ void  SetUpFlow::runNewBarInstruments(int _ins)
       if(CheckPointer(tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index))!= POINTER_INVALID)
         {
          //  tip=instrumentPointers[_ins].pContainerTip.GetNodeAtIndex(index);
-         CopyRates(tip.symbol,tip.waveHTFPeriod,0,101,tip.ratesThisTF);
+         CopyRates(tip.symbol,tip.waveHTFPeriod,0,100,tip.ratesThisTF);
          ArraySetAsSeries(tip.ratesThisTF,true);
          tip.setWaveArmValues(1);
          tip.setWaveArmStates(1);
@@ -180,8 +204,8 @@ void  SetUpFlow::runNewBarInstruments(int _ins)
             tip.atrWaveInfo.setWaveHeightPointsATR(tip.onScreenWaveHeight,1);
          else
             tip.atrWaveInfo.setWaveHeightPointsFixed(tip.onScreenWaveHeight);
-         tip.cciWaveInfo.setCCIValues(1);
-         tip.cciWaveInfo.setCCIState(tip.ratesThisTF[1].time);
+         tip.cciWaveInfo.setCCIValues(0);
+         tip.cciWaveInfo.setCCIState(0);
         }
       setMoveDiagLineValues(_ins,1);
       setCatalystState(_ins);
